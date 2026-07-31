@@ -183,6 +183,7 @@ fun SettingsDashboardScreen(
                                         onConfigChange(
                                             config.copy(
                                                 yOffsetDp = preset.config.yOffsetDp,
+                                                xOffsetDp = preset.config.xOffsetDp,
                                                 compactWidthDp = preset.config.compactWidthDp,
                                                 compactHeightDp = preset.config.compactHeightDp,
                                                 expandedWidthDp = preset.config.expandedWidthDp,
@@ -245,8 +246,15 @@ fun SettingsDashboardScreen(
                     CalibrationSlider(
                         label = "Vertical Offset (Y-Axis)",
                         value = config.yOffsetDp.toFloat(),
-                        range = 0f..60f,
+                        range = 0f..150f,
                         onValueChange = { onConfigChange(config.copy(yOffsetDp = it.toInt())) }
+                    )
+
+                    CalibrationSlider(
+                        label = "Horizontal Offset (X-Axis)",
+                        value = config.xOffsetDp.toFloat(),
+                        range = -100f..100f,
+                        onValueChange = { onConfigChange(config.copy(xOffsetDp = it.toInt())) }
                     )
 
                     CalibrationSlider(

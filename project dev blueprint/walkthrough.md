@@ -1,20 +1,22 @@
-# MyIsland - Native Dynamic Island (Phase 6 Next-Gen Features Built)
+# MyIsland - Native Dynamic Island (Motorola Edge 60 Pro Calibration Fixed)
 
-We have built Phase 6 Next-Gen features for **MyIsland**.
+We have resolved the Y-Offset alignment issue for **Motorola Edge 60 Pro**.
 
 ---
 
-## 🚀 Phase 6 Features Delivered
+## 🛠️ Motorola Edge 60 Pro Fixes Applied
 
-1. **Live Google Maps & Waze Turn-by-Turn Navigation**:
-   - Intercepts navigation notifications in [IslandNotificationListenerService.kt](file:///c:/Users/Deval%20Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/service/IslandNotificationListenerService.kt), displaying direction arrows (Turn Left, Turn Right, U-Turn), distance countdown (`150m`), and upcoming street names directly in the island pill.
+1. **Real-time SharedPreferences Sync**:
+   - Fixed SharedPreferences name mismatch (`"myisland_preferences"` in [PreferencesManager.kt](file:///c:/Users/Deval%20Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/data/PreferencesManager.kt) vs `"myisland_prefs"` in [IslandOverlayService.kt](file:///c:/Users/Deval%20Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/service/IslandOverlayService.kt)).
+   - Slider movements in Settings now immediately update `layoutParams.y` and `layoutParams.x` in real time on screen.
 
-2. **Glassmorphic Ambient Accent Glow Aura**:
-   - Rendered dynamic colored shadow aura in [DynamicIslandView.kt](file:///c:/Users/Deval%20Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/ui/overlay/DynamicIslandView.kt) matching active album artwork or app branding color.
+2. **Edge 60 Pro Preset Calibration**:
+   - Updated Motorola Edge 60 Pro default Y-Offset to `34dp` in [DevicePresets.kt](file:///c:/Users/Deval%20Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/data/DevicePresets.kt) so the island frames the punch-hole camera lens.
+   - Extended vertical slider range to `0dp – 150dp` in [SettingsScreens.kt](file:///c:/Users/Deval%20Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/ui/settings/SettingsScreens.kt).
 
 ---
 
 ## 🌐 GitHub Repository Status
 
 - Repository: **[https://github.com/dvlshlkhln/MyIsland](https://github.com/dvlshlkhln/MyIsland)**
-- All Phase 6 features committed to `working1` and merged into `main`.
+- All calibration fixes committed to `working1` and merged into `main`.

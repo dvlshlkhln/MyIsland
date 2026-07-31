@@ -103,7 +103,8 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
             islandConfig = prefsManager.getConfig()
             updateWindowLayout(currentMode, ScreenStateReceiver.isScreenOn.value)
         }
-        val sp = getSharedPreferences("myisland_prefs", Context.MODE_PRIVATE)
+        // Fixed: Use exact SharedPreferences name "myisland_preferences"
+        val sp = getSharedPreferences("myisland_preferences", Context.MODE_PRIVATE)
         sp.registerOnSharedPreferenceChangeListener(preferenceChangeListener)
     }
 
@@ -281,7 +282,7 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
         }
 
         preferenceChangeListener?.let { listener ->
-            val sp = getSharedPreferences("myisland_prefs", Context.MODE_PRIVATE)
+            val sp = getSharedPreferences("myisland_preferences", Context.MODE_PRIVATE)
             sp.unregisterOnSharedPreferenceChangeListener(listener)
         }
 
