@@ -244,7 +244,7 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
                             onToggleAudioOutput = {
                                 try {
                                     val intent = Intent(Settings.ACTION_SOUND_SETTINGS).apply {
-                                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                     }
                                     startActivity(intent)
                                 } catch (e: Exception) {
