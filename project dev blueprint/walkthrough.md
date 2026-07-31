@@ -1,29 +1,28 @@
-# MyIsland - Native Dynamic Island for Motorola & Samsung Devices
+# MyIsland - Native Dynamic Island (Phase 2 Completed)
 
-We have successfully implemented **Phase 1** of the **MyIsland** roadmap, adding instant 1-tap device calibration presets for **Samsung Galaxy S20 FE** and **Samsung Galaxy S23 Plus** alongside Motorola Edge series smartphones, as well as tactile haptic feedback.
-
----
-
-## 📱 Device Presets Included
-
-1. **Motorola Edge 60 Pro** (Default: Y = 12dp, Compact Width = 190dp, Height = 38dp, Radius = 24dp)
-2. **Samsung Galaxy S20 FE** (Y = 16dp, Compact Width = 180dp, Height = 36dp, Radius = 22dp)
-3. **Samsung Galaxy S23 Plus** (Y = 14dp, Compact Width = 175dp, Height = 35dp, Radius = 24dp)
-4. **Motorola Edge 50 Ultra / 40 Pro** (Y = 12dp, Compact Width = 185dp, Height = 36dp, Radius = 24dp)
-5. **Generic Center Punch-Hole** (Y = 14dp, Compact Width = 180dp, Height = 36dp, Radius = 22dp)
+Phase 2 of **MyIsland** is fully implemented and pushed to GitHub! This phase brings live phone call management, active countdown timers, and Bluetooth audio connection banners into the dynamic island.
 
 ---
 
-## 🛠️ Codebase Additions (Phase 1)
+## 🌟 Phase 2 Features Added
 
-- [DevicePresets.kt](file:///c:/Users/Deval%20Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/data/DevicePresets.kt): Added device preset data models and preset configurations.
-- [HapticManager.kt](file:///c:/Users/Deval%20Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/utils/HapticManager.kt): Integrated Android `Vibrator` / `VibrationEffect` engine for tactile clicks on tap, expansion, and media controls.
-- [SettingsScreens.kt](file:///c:/Users/Deval%20Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/ui/settings/SettingsScreens.kt): Added 1-tap Device Alignment Dropdown card in the dashboard.
-- [DynamicIslandView.kt](file:///c:/Users/Deval%20Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/ui/overlay/DynamicIslandView.kt): Connected haptics engine to island state transitions.
+1. **Live Phone Call Controller ([CallSessionManager.kt](file:///c:/Users/Deval%20Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/service/CallSessionManager.kt))**:
+   - Intercepts incoming (`CALL_STATE_RINGING`) and active (`CALL_STATE_OFFHOOK`) phone calls.
+   - Shows caller contact avatar, live elapsed call timer, and interactive **Mute Microphone** & **End Call** controls in expanded island card.
+
+2. **Active Countdown Timer ([TimerSessionManager.kt](file:///c:/Users/Deval%20Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/service/TimerSessionManager.kt))**:
+   - Streams active clock timers & stopwatches to the island pill.
+   - Shows live `MM:SS` countdown timer and **+1 Min** extension button.
+
+3. **Bluetooth Headphone Banners ([BluetoothEventReceiver.kt](file:///c:/Users/Deval%20Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/service/BluetoothEventReceiver.kt))**:
+   - Displays connection banner when Bluetooth headphones / ear-buds (Galaxy Buds, Moto Buds, AirPods, Sony) are paired or disconnected.
+
+4. **Multi-Device Presets (Phase 1 Retained)**:
+   - Motorola Edge 60 Pro, Samsung Galaxy S20 FE, Samsung Galaxy S23 Plus, Motorola Edge 50 Ultra.
 
 ---
 
 ## 🌐 GitHub Repository Status
 
 - Repository: **[https://github.com/dvlshlkhln/MyIsland](https://github.com/dvlshlkhln/MyIsland)**
-- Branch `main` is up-to-date with all Phase 1 commits.
+- All Phase 1 and Phase 2 implementations are pushed to `main`.
