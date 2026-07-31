@@ -46,6 +46,7 @@ fun DynamicIslandView(
     timerState: TimerState = TimerState(),
     bluetoothState: BluetoothDeviceState = BluetoothDeviceState(),
     volumeRingerState: VolumeRingerState = VolumeRingerState(),
+    navigationState: NavigationState = NavigationState(),
     onToggleExpand: () -> Unit,
     onPlayPauseToggle: () -> Unit,
     onSkipNext: () -> Unit,
@@ -105,14 +106,19 @@ fun DynamicIslandView(
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (mode != IslandMode.HIDDEN) {
-            // Main Island Pill
+            // Main Island Pill with Ambient Accent Glow Aura
             Box(
                 modifier = Modifier
                     .offset(x = (config.xOffsetDp + (animatedDragX / density)).dp)
                     .width(targetWidth)
                     .height(targetHeight)
                     .alpha(alphaFraction)
-                    .shadow(elevation = 16.dp, shape = RoundedCornerShape(config.cornerRadiusDp.dp), spotColor = paletteColors.vibrantAccent)
+                    .shadow(
+                        elevation = 20.dp,
+                        shape = RoundedCornerShape(config.cornerRadiusDp.dp),
+                        spotColor = if (navigationState.isNavigating) Color(0xFF00CEC9) else paletteColors.vibrantAccent,
+                        ambientColor = if (navigationState.isNavigating) Color(0xFF00CEC9) else paletteColors.vibrantAccent
+                    )
                     .clip(RoundedCornerShape(config.cornerRadiusDp.dp))
                     .background(PureBlack)
                     .animateContentSize(
@@ -165,6 +171,7 @@ fun DynamicIslandView(
                             timerState = timerState,
                             bluetoothState = bluetoothState,
                             volumeRingerState = volumeRingerState,
+                            navigationState = navigationState,
                             paletteColors = paletteColors
                         )
                     }
@@ -176,6 +183,7 @@ fun DynamicIslandView(
                             callState = callState,
                             timerState = timerState,
                             bluetoothState = bluetoothState,
+                            navigationState = navigationState,
                             paletteColors = paletteColors,
                             showQuickActionMenu = showQuickActionMenu,
                             onPlayPauseToggle = {

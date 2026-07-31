@@ -16,17 +16,23 @@ enum class CutoutShape {
     CORNER_NOTCH
 }
 
-enum class IslandContentType {
-    NONE,
-    MEDIA_PLAYER,
-    CALL,
-    TIMER,
-    NOTIFICATION,
-    CHARGING,
-    BLUETOOTH_BANNER,
-    VOLUME_RINGER,
-    RINGER_MODE
+enum class NavigationDirection {
+    STRAIGHT,
+    TURN_LEFT,
+    TURN_RIGHT,
+    SLIGHT_LEFT,
+    SLIGHT_RIGHT,
+    U_TURN,
+    ARRIVE
 }
+
+data class NavigationState(
+    val isNavigating: Boolean = false,
+    val direction: NavigationDirection = NavigationDirection.STRAIGHT,
+    val distanceText: String = "",
+    val streetName: String = "",
+    val appName: String = "Google Maps"
+)
 
 data class MediaState(
     val title: String = "",

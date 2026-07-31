@@ -35,6 +35,7 @@ fun CompactPillContent(
     timerState: TimerState = TimerState(),
     bluetoothState: BluetoothDeviceState = BluetoothDeviceState(),
     volumeRingerState: VolumeRingerState = VolumeRingerState(),
+    navigationState: NavigationState = NavigationState(),
     paletteColors: IslandPaletteColors = IslandPaletteColors(),
     modifier: Modifier = Modifier
 ) {
@@ -51,7 +52,19 @@ fun CompactPillContent(
             horizontalArrangement = Arrangement.Start,
             modifier = Modifier.weight(1f)
         ) {
-            if (volumeRingerState.isVolumeEvent) {
+            if (navigationState.isNavigating) {
+                Icon(
+                    imageVector = when (navigationState.direction) {
+                        NavigationDirection.TURN_LEFT -> Icons.Default.TurnLeft
+                        NavigationDirection.TURN_RIGHT -> Icons.Default.TurnRight
+                        NavigationDirection.U_TURN -> Icons.Default.UTurnLeft
+                        else -> Icons.Default.Navigation
+                    },
+                    contentDescription = "Navigation Direction",
+                    tint = Color(0xFF00CEC9),
+                    modifier = Modifier.size(20.dp)
+                )
+            } else if (volumeRingerState.isVolumeEvent) {
                 Icon(
                     imageVector = if (volumeRingerState.isMuted) Icons.Default.VolumeMute else Icons.Default.VolumeUp,
                     contentDescription = "Volume",
@@ -130,7 +143,14 @@ fun CompactPillContent(
             horizontalArrangement = Arrangement.End,
             modifier = Modifier.weight(1f)
         ) {
-            if (volumeRingerState.isVolumeEvent) {
+            if (navigationState.isNavigating) {
+                Text(
+                    text = navigationState.distanceText,
+                    color = Color(0xFF00CEC9),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            } else if (volumeRingerState.isVolumeEvent) {
                 LinearProgressIndicator(
                     progress = (volumeRingerState.volumePercent / 100f).coerceIn(0f, 1f),
                     modifier = Modifier

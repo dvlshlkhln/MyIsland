@@ -142,7 +142,7 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
             layoutParams.width = (wDp * density).toInt() + 16
             layoutParams.height = (hDp * density).toInt() + 16
             layoutParams.x = islandConfig.xOffsetDp
-            layoutParams.y = (islandConfig.yOffsetDp * density).toInt() // Direct Y-Offset window application!
+            layoutParams.y = (islandConfig.yOffsetDp * density).toInt()
         }
 
         try {
@@ -187,6 +187,7 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
                         ?.collectAsState() ?: MutableStateFlow(com.myisland.dynamic.data.MediaState()).collectAsState()
 
                     val notification by IslandNotificationListenerService.latestNotification.collectAsState()
+                    val navigationState by IslandNotificationListenerService.navigationState.collectAsState()
                     val chargingState by SystemEventReceiver.chargingState.collectAsState()
 
                     val callState by callSessionManager.callState.collectAsState()
@@ -210,6 +211,7 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
                             timerState = timerState,
                             bluetoothState = bluetoothState,
                             volumeRingerState = volumeRingerState,
+                            navigationState = navigationState,
                             onToggleExpand = {
                                 currentMode = if (currentMode == IslandMode.EXPANDED) IslandMode.COMPACT else IslandMode.EXPANDED
                             },
@@ -308,7 +310,7 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
 
     private fun buildForegroundNotification() = NotificationCompat.Builder(this, CHANNEL_ID)
         .setContentTitle("MyIsland is Running")
-        .setContentText("Dynamic Island active with Lockscreen AOD support")
+        .setContentText("Dynamic Island active with Lockscreen AOD & Live Maps Navigation")
         .setSmallIcon(android.R.drawable.ic_menu_compass)
         .setPriority(NotificationCompat.PRIORITY_LOW)
         .setOngoing(true)

@@ -31,6 +31,7 @@ fun ExpandedCardContent(
     callState: CallState = CallState(),
     timerState: TimerState = TimerState(),
     bluetoothState: BluetoothDeviceState = BluetoothDeviceState(),
+    navigationState: NavigationState = NavigationState(),
     paletteColors: IslandPaletteColors = IslandPaletteColors(),
     showQuickActionMenu: Boolean = false,
     onPlayPauseToggle: () -> Unit,
@@ -57,6 +58,8 @@ fun ExpandedCardContent(
                 onMuteActiveApp = onMuteActiveApp,
                 onDismiss = onDismiss
             )
+        } else if (navigationState.isNavigating) {
+            ExpandedNavigationView(navigationState = navigationState)
         } else if (callState.isRinging || callState.isActiveCall) {
             ExpandedCallView(
                 callState = callState,
@@ -89,6 +92,60 @@ fun ExpandedCardContent(
             ExpandedChargingView(chargingState = chargingState)
         } else {
             ExpandedDefaultView()
+        }
+    }
+}
+
+@Composable
+fun ExpandedNavigationView(navigationState: NavigationState) {
+    Row(
+        modifier = Modifier.fillMaxSize(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+            Box(
+                modifier = Modifier
+                    .size(52.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFF00CEC9).copy(alpha = 0.2f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = when (navigationState.direction) {
+                        NavigationDirection.TURN_LEFT -> Icons.Default.TurnLeft
+                        NavigationDirection.TURN_RIGHT -> Icons.Default.TurnRight
+                        NavigationDirection.U_TURN -> Icons.Default.UTurnLeft
+                        else -> Icons.Default.Navigation
+                    },
+                    contentDescription = "Navigation Direction",
+                    tint = Color(0xFF00CEC9),
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(14.dp))
+            Column {
+                Text(
+                    text = navigationState.appName,
+                    color = Color.White.copy(alpha = 0.6f),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = navigationState.streetName,
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = navigationState.distanceText,
+                    color = Color(0xFF00CEC9),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }

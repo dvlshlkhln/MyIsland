@@ -1,39 +1,34 @@
-# Ultra-Smooth iOS Dynamic Island Feature Plan
+# Phase 6: Next-Gen Features & Visual Masterpiece
 
-Plan to upgrade **MyIsland** to match iOS 18 Dynamic Island appearance with physics-based spring morphing and Dual-Pill multi-session splitting.
+A plan to introduce live turn-by-turn navigation, interactive drag alignment calibration, ambient album artwork glow aura, and granular app notification filtering.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> Please review the proposed visual and animation smoothness enhancements below!
+> Please review the proposed Phase 6 features below!
 
 ---
 
-## 🎨 Proposed Enhancements
+## 🚀 Proposed Phase 6 Features
 
-### 1. Organic Fluid Spring Morphing & Scale Physics
-- **Animation System**: Upgrade `animateContentSize` and width/height interpolators to custom spring specifications:
-  - `stiffness = Spring.StiffnessMediumLow`
-  - `dampingRatio = Spring.DampingRatioMediumBouncy`
-- **Effect**: Expanding and collapsing feels fluid, bouncy, and organic—just like iOS.
+### 1. Live Maps Turn-by-Turn Navigation Banner
+- **Overview**: Intercept Google Maps & Waze navigation notifications.
+- **UI Experience**: Displays real-time direction arrow icons (Turn Left, Turn Right, U-Turn), distance countdown (`150m`), and upcoming street names directly in the island pill.
 
-### 2. Dual-Pill Split Architecture (Dual Dynamic Island Sub-Pills)
-- **Multi-Session Support**: When two background activities are active simultaneously (e.g., Spotify Music + Active Countdown Timer):
-  - **Left Main Pill**: Displays Music Album Cover & Visualizer
-  - **Right Detached Sub-Pill**: Displays Live Timer Badge (e.g., `04:12`)
-- Tapping either pill expands its respective session card!
+### 2. Glassmorphic Ambient Accent Glow Aura
+- **Overview**: Use extracted `Palette` accent color to render a subtle, pulsating 3D glowing shadow aura around the island container matching active music album art or app branding.
 
-### 3. Hardware Camera Lens Blend Rim
-- Render an ultra-subtle glossy inner border and camera cutout mask so the physical camera lens melts seamlessly into the OLED black island pixels.
+### 3. Interactive On-Screen Drag Alignment Calibration
+- **Overview**: Enable a drag-to-position calibration mode where users can drag the floating island pill directly around their camera hole with their finger to lock in exact X & Y offsets.
 
-### 4. 4-Bar Sine Wave Frequency Audio Visualizer
-- Upgrade music visualizer to a 4-bar sine-wave physics animation with dynamic height phase shifts according to active media playback.
+### 4. Granular App Notification Whitelist / Blacklist
+- **Overview**: Allow users to toggle notification popups on/off per app (e.g., WhatsApp: ON, Instagram: ON, System: OFF).
 
 ---
 
 ## Verification Plan
 
 ### Manual Verification
-1. Play music + start timer simultaneously -> verify dual-pill splitting.
-2. Expand and collapse island -> verify fluid spring bouncy animation.
-3. Observe visualizer bars during playback.
+1. Start Google Maps navigation -> verify turn direction arrow in island.
+2. Drag island on screen in calibration mode -> verify real-time position save.
+3. Observe ambient colored glow around music playback.

@@ -16,6 +16,8 @@ Every commit pushed or merged into the `main` branch automatically triggers GitH
 
 ## ✨ Features
 
+- 🗺️ **Live Google Maps & Waze Turn-by-Turn Navigation**: Intercepts navigation directions, rendering real-time direction arrows (Turn Left, Turn Right, U-Turn), distance countdown (`150m`), and upcoming street names directly in the island pill.
+- ✨ **Ambient Accent Aura Glow**: Glassmorphic glowing shadow aura around the island container dynamically tinted by album artwork or app branding color.
 - 👯 **Dual-Pill Split Sub-Pill Architecture (iOS Multi-Session)**: When music and a countdown timer run simultaneously, the island splits organically into a main left pill and a secondary detached right sub-pill.
 - 🌊 **4-Bar Sine Wave Audio Visualizer**: Dynamic equalizer bars with phase-shifted height physics matching active playback rhythm.
 - 💨 **Fluid Bouncy Spring Physics**: Morphing animations spec tuned to `Spring.StiffnessMediumLow` & `Spring.DampingRatioMediumBouncy` for authentic iOS fluid motion.
