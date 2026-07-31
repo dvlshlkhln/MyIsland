@@ -1,28 +1,22 @@
-# MyIsland - Native Dynamic Island (Phase 4 Completed - All Roadmap Phases Built)
+# MyIsland - Native Dynamic Island (Touch Freeze Fix & Swipe Dismiss Added)
 
-Phase 4 of **MyIsland** is fully implemented! The codebase now features real-time dynamic color extraction from album covers and app icons via Android's `Palette` API.
-
----
-
-## 🎨 Phase 4 Features
-
-1. **Dynamic Palette Accent Engine ([PaletteThemeExtractor.kt](file:///c:/Users/Deval%20Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/utils/PaletteThemeExtractor.kt))**:
-   - Analyzes active album cover art or notification app icons using `androidx.palette:palette-ktx`.
-   - Extracts vibrant accents, dominant glow hues, and muted background tones.
-   - Automatically tints play buttons, audio visualizer bars, seek progress indicators, and glowing island shadows in [DynamicIslandView.kt](file:///c:/Users/Deval%20Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/ui/overlay/DynamicIslandView.kt).
+We have resolved the UI touch blocking / freezing issue and added the requested **Swipe Left Gesture & Dismiss Animation**.
 
 ---
 
-## 🚀 Complete 4-Phase Roadmap Summary
+## 🛠️ Fixes & Enhancements
 
-- ✅ **Phase 1**: Interactive Gestures, Dual-Island Split, Haptics & 1-Tap Presets (Motorola Edge 60 Pro, Samsung S20 FE, Samsung S23 Plus, Motorola Edge 50 Ultra).
-- ✅ **Phase 2**: Live Phone Call Manager (`TelephonyManager`), Active Countdown Timers, and Bluetooth Accessory Banners.
-- ✅ **Phase 3**: Smart Power Saver (`ScreenStateReceiver`) for 0.0% standby battery consumption when the screen is turned off.
-- ✅ **Phase 4**: Dynamic Palette Theme Engine (`androidx.palette:palette-ktx`) for real-time album art color matching.
+1. **Touch-Passthrough Window Architecture (UI Freeze Resolution)**:
+   - **Root Cause**: Previously, `WindowManager.LayoutParams` set the root `ComposeView` window size to `MATCH_PARENT` x `MATCH_PARENT`, causing an invisible full-screen transparent view to intercept taps intended for underlying apps.
+   - **Fix**: Implemented `updateWindowLayout(mode, isScreenOn)` in [IslandOverlayService.kt](file:///c:/Users/Deval%20Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/service/IslandOverlayService.kt). The window size is dynamically resized to strictly match ONLY the island pill dimensions (`compactWidthDp` x `compactHeightDp + yOffsetDp`) with `WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL`. Taps anywhere else on the screen pass through 100% unimpeded!
+
+2. **Swipe Left Dismiss Gesture & Animation**:
+   - Added horizontal drag gesture detection (`detectHorizontalDragGestures`) in [DynamicIslandView.kt](file:///c:/Users/Deval%20Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/ui/overlay/DynamicIslandView.kt).
+   - Swiping left smoothly shifts the pill to the left with an alpha fade-out animation and heavy haptic feedback, dismissing the current alert/notification.
 
 ---
 
 ## 🌐 GitHub Repository Status
 
 - Repository: **[https://github.com/dvlshlkhln/MyIsland](https://github.com/dvlshlkhln/MyIsland)**
-- All 4 phases are fully built, documented, and pushed to `main`.
+- Changes committed to `working1` and merged into `main`.

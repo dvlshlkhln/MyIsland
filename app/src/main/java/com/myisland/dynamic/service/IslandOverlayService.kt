@@ -7,15 +7,11 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.PixelFormat
 import android.os.Build
-import android.os.Bundle
 import android.os.PowerManager
 import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
@@ -48,6 +44,8 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
 
     private var currentMode by mutableStateOf(IslandMode.COMPACT)
     private var islandConfig by mutableStateOf(IslandConfig())
+
+    private lateinit var layoutParams: WindowManager.LayoutParams
 
     companion object {
         const val CHANNEL_ID = "myisland_service_channel"
@@ -97,18 +95,50 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
         registerReceiver(screenStateReceiver, filter)
     }
 
+    private fun updateWindowLayout(mode: IslandMode, isScreenOn: Boolean) {
+        if (!::overlayView.isInitialized || !::windowManager.isInitialized || !::layoutParams.isInitialized) return
+
+        val density = resources.displayMetrics.density
+
+        if (!isScreenOn || mode == IslandMode.HIDDEN) {
+            layoutParams.width = 1
+            layoutParams.height = 1
+        } else {
+            val (wDp, hDp) = when (mode) {
+                IslandMode.COMPACT -> Pair(islandConfig.compactWidthDp, islandConfig.compactHeightDp)
+                IslandMode.EXPANDED -> Pair(islandConfig.expandedWidthDp, islandConfig.expandedHeightDp)
+                IslandMode.TOAST -> Pair(islandConfig.expandedWidthDp - 20, islandConfig.compactHeightDp + 16)
+                else -> Pair(1, 1)
+            }
+
+            layoutParams.width = (wDp * density).toInt() + 16
+            layoutParams.height = ((hDp + islandConfig.yOffsetDp) * density).toInt() + 16
+        }
+
+        try {
+            windowManager.updateViewLayout(overlayView, layoutParams)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     private fun setupOverlayView() {
-        val layoutParams = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.MATCH_PARENT,
-            WindowManager.LayoutParams.WRAP_CONTENT,
+        val density = resources.displayMetrics.density
+        val initialWidth = ((islandConfig.compactWidthDp) * density).toInt() + 16
+        val initialHeight = ((islandConfig.compactHeightDp + islandConfig.yOffsetDp) * density).toInt() + 16
+
+        layoutParams = WindowManager.LayoutParams(
+            initialWidth,
+            initialHeight,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
-                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
-            y = islandConfig.yOffsetDp
+            x = islandConfig.xOffsetDp
+            y = 0
         }
 
         overlayView = ComposeView(this).apply {
@@ -118,7 +148,6 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
             setContent {
                 MyIslandTheme {
                     val isScreenOn by ScreenStateReceiver.isScreenOn.collectAsState()
-                    val isPowerSaveMode by ScreenStateReceiver.isPowerSaveMode.collectAsState()
 
                     val mediaState by IslandNotificationListenerService.mediaControllerInstance?.mediaState
                         ?.collectAsState() ?: MutableStateFlow(com.myisland.dynamic.data.MediaState()).collectAsState()
@@ -130,7 +159,11 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
                     val timerState by timerSessionManager.timerState.collectAsState()
                     val bluetoothState by BluetoothEventReceiver.bluetoothState.collectAsState()
 
-                    // Smart Render Throttle: Suspend rendering when screen is off to achieve 0.0% battery drain
+                    // Dynamically update window layout size to eliminate touch blocking
+                    LaunchedEffect(currentMode, isScreenOn) {
+                        updateWindowLayout(currentMode, isScreenOn)
+                    }
+
                     if (isScreenOn) {
                         this@apply.visibility = View.VISIBLE
                         DynamicIslandView(
@@ -157,6 +190,9 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
                             onDismiss = {
                                 currentMode = IslandMode.COMPACT
                             },
+                            onSwipeLeftDismiss = {
+                                currentMode = IslandMode.COMPACT
+                            },
                             onEndCall = {
                                 callSessionManager.endCall()
                             },
@@ -168,7 +204,6 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
                             }
                         )
                     } else {
-                        // Display is off: Hide overlay and suspend GPU draw calls
                         this@apply.visibility = View.GONE
                     }
                 }
