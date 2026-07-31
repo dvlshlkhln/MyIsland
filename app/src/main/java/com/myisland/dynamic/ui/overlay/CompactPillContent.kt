@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.myisland.dynamic.data.*
+import com.myisland.dynamic.service.VolumeRingerState
 import com.myisland.dynamic.ui.theme.VibrantGreen
 import com.myisland.dynamic.utils.IslandPaletteColors
 
@@ -32,6 +34,7 @@ fun CompactPillContent(
     callState: CallState = CallState(),
     timerState: TimerState = TimerState(),
     bluetoothState: BluetoothDeviceState = BluetoothDeviceState(),
+    volumeRingerState: VolumeRingerState = VolumeRingerState(),
     paletteColors: IslandPaletteColors = IslandPaletteColors(),
     modifier: Modifier = Modifier
 ) {
@@ -48,7 +51,14 @@ fun CompactPillContent(
             horizontalArrangement = Arrangement.Start,
             modifier = Modifier.weight(1f)
         ) {
-            if (callState.isRinging || callState.isActiveCall) {
+            if (volumeRingerState.isVolumeEvent) {
+                Icon(
+                    imageVector = if (volumeRingerState.isMuted) Icons.Default.VolumeMute else Icons.Default.VolumeUp,
+                    contentDescription = "Volume",
+                    tint = paletteColors.vibrantAccent,
+                    modifier = Modifier.size(18.dp)
+                )
+            } else if (callState.isRinging || callState.isActiveCall) {
                 Icon(
                     imageVector = Icons.Default.Call,
                     contentDescription = "Call",
@@ -120,7 +130,17 @@ fun CompactPillContent(
             horizontalArrangement = Arrangement.End,
             modifier = Modifier.weight(1f)
         ) {
-            if (callState.isActiveCall) {
+            if (volumeRingerState.isVolumeEvent) {
+                LinearProgressIndicator(
+                    progress = (volumeRingerState.volumePercent / 100f).coerceIn(0f, 1f),
+                    modifier = Modifier
+                        .width(48.dp)
+                        .height(6.dp)
+                        .clip(CircleShape),
+                    color = paletteColors.vibrantAccent,
+                    trackColor = Color.White.copy(alpha = 0.2f)
+                )
+            } else if (callState.isActiveCall) {
                 val mins = callState.callDurationSeconds / 60
                 val secs = callState.callDurationSeconds % 60
                 Text(

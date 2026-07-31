@@ -9,6 +9,13 @@ enum class IslandMode {
     TOAST
 }
 
+enum class CutoutShape {
+    SINGLE_HOLE,
+    PILL,
+    DUAL_HOLE,
+    CORNER_NOTCH
+}
+
 enum class IslandContentType {
     NONE,
     MEDIA_PLAYER,
@@ -17,6 +24,7 @@ enum class IslandContentType {
     NOTIFICATION,
     CHARGING,
     BLUETOOTH_BANNER,
+    VOLUME_RINGER,
     RINGER_MODE
 }
 
@@ -50,7 +58,7 @@ data class TimerState(
 data class BluetoothDeviceState(
     val deviceName: String = "",
     val isConnected: Boolean = false,
-    val batteryLevel: Int = -1 // -1 if unknown
+    val batteryLevel: Int = -1
 )
 
 data class NotificationItem(
@@ -82,11 +90,14 @@ data class IslandConfig(
     val expandedWidthDp: Int = 350,
     val expandedHeightDp: Int = 170,
     val cornerRadiusDp: Int = 24,
+    val cutoutShape: CutoutShape = CutoutShape.SINGLE_HOLE,
+    val showOnLockscreen: Boolean = true,
     val isMusicEnabled: Boolean = true,
     val isChargingEnabled: Boolean = true,
     val isNotificationsEnabled: Boolean = true,
     val isCallsEnabled: Boolean = true,
     val isTimersEnabled: Boolean = true,
     val isBluetoothEnabled: Boolean = true,
+    val isVolumeHudEnabled: Boolean = true,
     val autoCollapseSeconds: Int = 4
 )

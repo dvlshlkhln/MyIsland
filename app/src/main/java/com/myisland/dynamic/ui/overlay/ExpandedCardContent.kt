@@ -32,20 +32,24 @@ fun ExpandedCardContent(
     timerState: TimerState = TimerState(),
     bluetoothState: BluetoothDeviceState = BluetoothDeviceState(),
     paletteColors: IslandPaletteColors = IslandPaletteColors(),
+    showQuickActionMenu: Boolean = false,
     onPlayPauseToggle: () -> Unit,
     onSkipNext: () -> Unit,
     onSkipPrevious: () -> Unit,
     onDismiss: () -> Unit,
     onEndCall: () -> Unit = {},
     onToggleMuteCall: () -> Unit = {},
-    onAddTimerMinute: () -> Unit = {}
+    onAddTimerMinute: () -> Unit = {},
+    onSendQuickReply: (String) -> Unit = {}
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        if (callState.isRinging || callState.isActiveCall) {
+        if (showQuickActionMenu) {
+            ExpandedQuickActionPaletteView(onDismiss = onDismiss)
+        } else if (callState.isRinging || callState.isActiveCall) {
             ExpandedCallView(
                 callState = callState,
                 onEndCall = onEndCall,
@@ -70,12 +74,74 @@ fun ExpandedCardContent(
         } else if (notification != null) {
             ExpandedNotificationView(
                 notification = notification,
-                onDismiss = onDismiss
+                onDismiss = onDismiss,
+                onSendReply = onSendQuickReply
             )
         } else if (chargingState.isCharging) {
             ExpandedChargingView(chargingState = chargingState)
         } else {
             ExpandedDefaultView()
+        }
+    }
+}
+
+@Composable
+fun ExpandedQuickActionPaletteView(onDismiss: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxSize(),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            IconButton(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFF0984E3))
+            ) {
+                Icon(imageVector = Icons.Default.VolumeUp, contentDescription = "Speaker", tint = Color.White)
+            }
+            Text(text = "Audio Out", fontSize = 11.sp, color = Color.White.copy(alpha = 0.8f))
+        }
+
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            IconButton(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFFFDCB6E))
+            ) {
+                Icon(imageVector = Icons.Default.FlashlightOn, contentDescription = "Flashlight", tint = Color.Black)
+            }
+            Text(text = "Torch", fontSize = 11.sp, color = Color.White.copy(alpha = 0.8f))
+        }
+
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            IconButton(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFF6C5CE7))
+            ) {
+                Icon(imageVector = Icons.Default.NotificationsOff, contentDescription = "Mute Notifs", tint = Color.White)
+            }
+            Text(text = "Mute App", fontSize = 11.sp, color = Color.White.copy(alpha = 0.8f))
+        }
+
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            IconButton(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFFD63031))
+            ) {
+                Icon(imageVector = Icons.Default.Close, contentDescription = "Close Menu", tint = Color.White)
+            }
+            Text(text = "Close", fontSize = 11.sp, color = Color.White.copy(alpha = 0.8f))
         }
     }
 }
@@ -319,7 +385,6 @@ fun ExpandedMediaView(
             }
         }
 
-        // Progress Bar
         val progress = if (mediaState.durationMs > 0) {
             (mediaState.positionMs.toFloat() / mediaState.durationMs.toFloat()).coerceIn(0f, 1f)
         } else 0f
@@ -334,7 +399,6 @@ fun ExpandedMediaView(
             trackColor = Color.White.copy(alpha = 0.2f)
         )
 
-        // Playback Controls
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly,
@@ -380,78 +444,129 @@ fun ExpandedMediaView(
 @Composable
 fun ExpandedNotificationView(
     notification: NotificationItem,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onSendReply: (String) -> Unit = {}
 ) {
-    Row(
-        modifier = Modifier.fillMaxSize(),
-        verticalAlignment = Alignment.Top
-    ) {
-        if (notification.icon != null) {
-            Image(
-                bitmap = notification.icon.asImageBitmap(),
-                contentDescription = "App Icon",
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-            )
-        } else {
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFF0984E3)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Notifications,
-                    contentDescription = "Notification",
-                    tint = Color.White
+    var replyText by remember { mutableStateOf("") }
+    var isReplying by remember { mutableStateOf(false) }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (notification.icon != null) {
+                Image(
+                    bitmap = notification.icon.asImageBitmap(),
+                    contentDescription = "App Icon",
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
                 )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFF0984E3)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Notifications,
+                        contentDescription = "Notification",
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
-        }
 
-        Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(10.dp))
 
-        Column(modifier = Modifier.weight(1f)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = notification.appName,
                     color = Color.White.copy(alpha = 0.6f),
                     fontSize = 11.sp,
                     fontWeight = FontWeight.SemiBold
                 )
-                IconButton(onClick = onDismiss, modifier = Modifier.size(20.dp)) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Close",
-                        tint = Color.White.copy(alpha = 0.6f),
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
+                Text(
+                    text = notification.title,
+                    color = Color.White,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
 
-            Text(
-                text = notification.title,
-                color = Color.White,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            IconButton(onClick = onDismiss, modifier = Modifier.size(24.dp)) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Close",
+                    tint = Color.White.copy(alpha = 0.6f),
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
 
-            Spacer(modifier = Modifier.height(2.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
-            Text(
-                text = notification.message,
-                color = Color.White.copy(alpha = 0.9f),
-                fontSize = 12.sp,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
+        if (isReplying) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedTextField(
+                    value = replyText,
+                    onValueChange = { replyText = it },
+                    placeholder = { Text("Type reply...", fontSize = 12.sp, color = Color.Gray) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedContainerColor = Color(0xFF22222E),
+                        unfocusedContainerColor = Color(0xFF16161E)
+                    ),
+                    singleLine = true
+                )
+                IconButton(
+                    onClick = {
+                        if (replyText.isNotBlank()) {
+                            onSendReply(replyText)
+                            isReplying = false
+                            replyText = ""
+                        }
+                    }
+                ) {
+                    Icon(imageVector = Icons.Default.Send, contentDescription = "Send", tint = Color(0xFF00B894))
+                }
+            }
+        } else {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = notification.message,
+                    color = Color.White.copy(alpha = 0.9f),
+                    fontSize = 12.sp,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+                Button(
+                    onClick = { isReplying = true },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0984E3)),
+                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(text = "Reply", fontSize = 11.sp, color = Color.White)
+                }
+            }
         }
     }
 }

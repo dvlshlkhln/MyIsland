@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.PixelFormat
+import android.media.AudioManager
 import android.os.Build
 import android.os.PowerManager
 import android.view.Gravity
@@ -40,6 +41,8 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
 
     private lateinit var callSessionManager: CallSessionManager
     private lateinit var timerSessionManager: TimerSessionManager
+    private lateinit var volumeRingerManager: VolumeRingerManager
+
     private val screenStateReceiver = ScreenStateReceiver()
 
     private var currentMode by mutableStateOf(IslandMode.COMPACT)
@@ -78,7 +81,10 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
 
         timerSessionManager = TimerSessionManager()
 
-        registerScreenReceiver()
+        volumeRingerManager = VolumeRingerManager(this)
+        VolumeRingerReceiver.manager = volumeRingerManager
+
+        registerReceivers()
         createNotificationChannel()
         startForeground(NOTIFICATION_ID, buildForegroundNotification())
 
@@ -86,13 +92,19 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
         setupOverlayView()
     }
 
-    private fun registerScreenReceiver() {
-        val filter = IntentFilter().apply {
+    private fun registerReceivers() {
+        val screenFilter = IntentFilter().apply {
             addAction(Intent.ACTION_SCREEN_OFF)
             addAction(Intent.ACTION_SCREEN_ON)
             addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED)
         }
-        registerReceiver(screenStateReceiver, filter)
+        registerReceiver(screenStateReceiver, screenFilter)
+
+        val volumeFilter = IntentFilter().apply {
+            addAction("android.media.VOLUME_CHANGED_ACTION")
+            addAction(AudioManager.RINGER_MODE_CHANGED_ACTION)
+        }
+        registerReceiver(VolumeRingerReceiver(), volumeFilter)
     }
 
     private fun updateWindowLayout(mode: IslandMode, isScreenOn: Boolean) {
@@ -127,13 +139,16 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
         val initialWidth = ((islandConfig.compactWidthDp) * density).toInt() + 16
         val initialHeight = ((islandConfig.compactHeightDp + islandConfig.yOffsetDp) * density).toInt() + 16
 
+        val flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                if (islandConfig.showOnLockscreen) WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED else 0
+
         layoutParams = WindowManager.LayoutParams(
             initialWidth,
             initialHeight,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
-                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+            flags,
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
@@ -158,8 +173,8 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
                     val callState by callSessionManager.callState.collectAsState()
                     val timerState by timerSessionManager.timerState.collectAsState()
                     val bluetoothState by BluetoothEventReceiver.bluetoothState.collectAsState()
+                    val volumeRingerState by volumeRingerManager.volumeState.collectAsState()
 
-                    // Dynamically update window layout size to eliminate touch blocking
                     LaunchedEffect(currentMode, isScreenOn) {
                         updateWindowLayout(currentMode, isScreenOn)
                     }
@@ -175,6 +190,7 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
                             callState = callState,
                             timerState = timerState,
                             bluetoothState = bluetoothState,
+                            volumeRingerState = volumeRingerState,
                             onToggleExpand = {
                                 currentMode = if (currentMode == IslandMode.EXPANDED) IslandMode.COMPACT else IslandMode.EXPANDED
                             },
@@ -250,7 +266,7 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
 
     private fun buildForegroundNotification() = NotificationCompat.Builder(this, CHANNEL_ID)
         .setContentTitle("MyIsland is Running")
-        .setContentText("Dynamic Island active with smart power saver")
+        .setContentText("Dynamic Island active with Lockscreen AOD support")
         .setSmallIcon(android.R.drawable.ic_menu_compass)
         .setPriority(NotificationCompat.PRIORITY_LOW)
         .setOngoing(true)

@@ -7,6 +7,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
@@ -20,6 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.myisland.dynamic.data.*
+import com.myisland.dynamic.service.VolumeRingerState
 import com.myisland.dynamic.ui.theme.PureBlack
 import com.myisland.dynamic.utils.HapticManager
 import com.myisland.dynamic.utils.PaletteThemeExtractor
@@ -34,6 +36,7 @@ fun DynamicIslandView(
     callState: CallState = CallState(),
     timerState: TimerState = TimerState(),
     bluetoothState: BluetoothDeviceState = BluetoothDeviceState(),
+    volumeRingerState: VolumeRingerState = VolumeRingerState(),
     onToggleExpand: () -> Unit,
     onPlayPauseToggle: () -> Unit,
     onSkipNext: () -> Unit,
@@ -47,6 +50,8 @@ fun DynamicIslandView(
     val context = LocalContext.current
     val density = LocalDensity.current.density
     val hapticManager = remember { HapticManager(context) }
+
+    var showQuickActionMenu by remember { mutableStateOf(false) }
 
     // Dynamic Palette Extractor
     val paletteColors = remember(mediaState.albumArt, notification?.icon) {
@@ -101,6 +106,22 @@ fun DynamicIslandView(
                         )
                     )
                     .pointerInput(Unit) {
+                        detectTapGestures(
+                            onTap = {
+                                hapticManager.performClickHaptic()
+                                showQuickActionMenu = false
+                                onToggleExpand()
+                            },
+                            onLongPress = {
+                                hapticManager.performHeavyHaptic()
+                                showQuickActionMenu = true
+                                if (mode != IslandMode.EXPANDED) {
+                                    onToggleExpand()
+                                }
+                            }
+                        )
+                    }
+                    .pointerInput(Unit) {
                         detectHorizontalDragGestures(
                             onDragEnd = {
                                 if (dragXOffset < -100f) {
@@ -117,10 +138,6 @@ fun DynamicIslandView(
                             }
                         )
                     }
-                    .clickable {
-                        hapticManager.performClickHaptic()
-                        onToggleExpand()
-                    }
             ) {
                 when (mode) {
                     IslandMode.COMPACT -> {
@@ -131,6 +148,7 @@ fun DynamicIslandView(
                             callState = callState,
                             timerState = timerState,
                             bluetoothState = bluetoothState,
+                            volumeRingerState = volumeRingerState,
                             paletteColors = paletteColors
                         )
                     }
@@ -143,6 +161,7 @@ fun DynamicIslandView(
                             timerState = timerState,
                             bluetoothState = bluetoothState,
                             paletteColors = paletteColors,
+                            showQuickActionMenu = showQuickActionMenu,
                             onPlayPauseToggle = {
                                 hapticManager.performClickHaptic()
                                 onPlayPauseToggle()
@@ -157,6 +176,7 @@ fun DynamicIslandView(
                             },
                             onDismiss = {
                                 hapticManager.performHeavyHaptic()
+                                showQuickActionMenu = false
                                 onDismiss()
                             },
                             onEndCall = {

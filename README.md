@@ -16,8 +16,12 @@ Every commit pushed or merged into the `main` branch automatically triggers GitH
 
 ## ✨ Features
 
-- 🎯 **Touch-Passthrough Window Architecture (UI Freeze Fix)**: Dynamically adjusts `WindowManager` overlay dimensions to strictly cover the island pill area with `FLAG_NOT_TOUCH_MODAL`, allowing taps anywhere else on the screen to pass through 100% unimpeded.
+- 🔊 **iOS-Style Top Volume & Ringer Island HUD**: Top-mounted progress slider popping directly from your punch-hole camera on side volume button presses.
+- 💬 **In-Island Quick Reply**: Type and send replies directly inside the expanded notification card for WhatsApp, Telegram, and SMS.
+- 🔒 **Lockscreen & Always-On Display (AOD) Support**: Stays active on your lockscreen (`FLAG_SHOW_WHEN_LOCKED`) for ongoing music, timers, and caller alerts.
+- 🖐️ **Radial Long-Press Quick Action Palette**: Long-pressing the island opens a popup wheel to switch audio output, mute app notifications, or toggle the flashlight.
 - 👈 **Swipe Left Gesture & Dismiss Animation**: Swipe left on the island pill to dismiss notifications or collapse views with fluid haptics and slide-out alpha animations.
+- 🎯 **Touch-Passthrough Window Architecture (UI Freeze Fix)**: Dynamically adjusts `WindowManager` overlay dimensions to strictly cover the island pill area with `FLAG_NOT_TOUCH_MODAL`, allowing taps anywhere else on the screen to pass through 100% unimpeded.
 - 🎨 **Dynamic Palette Accent Engine**: Real-time album cover artwork & app icon color extraction via Android `Palette` API. Automatically tints progress bars, play buttons, visualizer bars, and floating island glowing shadows to match active media.
 - 🔋 **Smart Power Saver & Zero Standby Battery Drain**: Automatically suspends Compose rendering pipelines and sets overlay visibility to `View.GONE` when the display turns off (`ACTION_SCREEN_OFF`), ensuring 0.0% standby battery drain.
 - 🏝️ **Native System Overlay (`TYPE_APPLICATION_OVERLAY`)**: Floats smoothly on top of all apps, status bars, and lock screens with physics-based spring animations.
