@@ -1,14 +1,11 @@
-# Phased Enhancement Roadmap for MyIsland (Motorola Edge 60 Pro)
+# Phased Enhancement Roadmap for MyIsland (Motorola Edge 60 Pro & Multi-Device Support)
 
 An extensive multi-phase engineering plan to evolve **MyIsland** into a feature-complete, highly polished, and low-power native Android Dynamic Island implementation.
 
-## User Review Required
-
-> [!IMPORTANT]
-> **Phase Prioritization**: The proposed roadmap is broken into 4 distinct phases. Please review the proposed phases below and let us know which phase you would like us to begin implementing first!
+## User Feedback Integrated
 
 > [!NOTE]
-> All new features will retain backwards compatibility with your current Motorola Edge 60 Pro calibration settings and persistent configuration.
+> Added pre-calibrated cutout alignment profiles for **Samsung Galaxy S20 FE** and **Samsung Galaxy S23 Plus** alongside Motorola Edge series devices.
 
 ---
 
@@ -16,19 +13,27 @@ An extensive multi-phase engineering plan to evolve **MyIsland** into a feature-
 
 ```mermaid
 graph TD
-    A[Current Core Service] --> B[Phase 1: UX & Interactive Gestures]
+    A[Current Core Service] --> B[Phase 1: UX, Interactive Gestures & Multi-Device Presets]
     B --> C[Phase 2: Calls, Timers & Hardware Events]
     C --> D[Phase 3: Smart Battery & System Performance]
-    D --> E[Phase 4: Palette Theme Engine & Device Presets]
+    D --> E[Phase 4: Palette Theme Engine]
 ```
 
 ---
 
 ## Proposed Phases
 
-### Phase 1: Interactive Gestures, Dual-Island Split & Haptic Feedback
+### Phase 1: Interactive Gestures, Dual-Island Split, Haptics & Device Presets
 
-Focuses on fluid touch interactions, multi-tasking island split views, and tactile haptics.
+Focuses on fluid touch interactions, multi-tasking island split views, tactile haptics, and instant device calibration presets.
+
+#### [NEW] [DevicePresets.kt](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/data/DevicePresets.kt)
+- Add pre-calibrated alignment profiles:
+  1. **Motorola Edge 60 Pro** (Default: Y = 12dp, Width = 190dp, Height = 38dp, Radius = 24dp)
+  2. **Samsung Galaxy S20 FE** (Y = 16dp, Width = 180dp, Height = 36dp, Radius = 22dp)
+  3. **Samsung Galaxy S23 Plus** (Y = 14dp, Width = 175dp, Height = 35dp, Radius = 24dp)
+  4. **Motorola Edge 50 Ultra / Edge 40 Pro** (Y = 12dp, Width = 185dp, Height = 36dp, Radius = 24dp)
+  5. **Generic Center Punch-Hole** (Y = 14dp, Width = 180dp, Height = 36dp, Radius = 22dp)
 
 #### [MODIFY] [DynamicIslandView.kt](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/ui/overlay/DynamicIslandView.kt)
 - Add gesture detectors:
@@ -40,61 +45,11 @@ Focuses on fluid touch interactions, multi-tasking island split views, and tacti
 #### [NEW] [HapticManager.kt](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/utils/HapticManager.kt)
 - Integrate Android `Vibrator` and `VibrationEffect.createPredefined` for subtle haptic clicks when expanding/collapsing the island or pressing media controls.
 
----
-
-### Phase 2: Live Phone Calls, Active Timers & Bluetooth Headset Banners
-
-Expands system event observers to support native phone calls, timers, and connected Bluetooth accessories.
-
-#### [NEW] [CallSessionManager.kt](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/service/CallSessionManager.kt)
-- Intercept incoming and active phone calls via `TelecomManager` / `PhoneStateListener`.
-- Display caller contact name, avatar, live call timer, and interactive Mute / End Call buttons in expanded mode.
-
-#### [NEW] [TimerSessionManager.kt](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/service/TimerSessionManager.kt)
-- Read active system clock timers & stopwatches to show a live circular countdown progress ring around the island.
-
-#### [NEW] [BluetoothEventReceiver.kt](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/service/BluetoothEventReceiver.kt)
-- Listen for Bluetooth headphone / accessory connections (`ACTION_AUDIO_STATE_CHANGED`).
-- Show animated connection banner displaying connected device name (e.g., Moto Buds, Galaxy Buds, AirPods) and battery status.
-
-#### [MODIFY] [ExpandedCardContent.kt](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/ui/overlay/ExpandedCardContent.kt)
-- Add quick inline reply input field for messaging notifications (WhatsApp, Telegram, SMS).
+#### [MODIFY] [SettingsScreens.kt](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/ui/settings/SettingsScreens.kt)
+- Add **Device Preset Dropdown Selector** in the settings dashboard for 1-tap calibration across Motorola and Samsung devices.
 
 ---
 
-### Phase 3: Smart Battery Throttling & Power Optimization
+### Phase 1 Execution
 
-Ensures zero background battery drain when the device is idle or screen is off.
-
-#### [MODIFY] [IslandOverlayService.kt](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/service/IslandOverlayService.kt)
-- Register `ScreenStateReceiver` (`ACTION_SCREEN_OFF` / `ACTION_SCREEN_ON`).
-- Automatically suspend Compose rendering pipelines and detach `ComposeView` draw calls when the display turns off, achieving **0.0% standby battery consumption**.
-
----
-
-### Phase 4: Dynamic Palette Theme Engine & Hardware Presets
-
-Personalizes visual aesthetics based on active app album artwork and device models.
-
-#### [NEW] [PaletteThemeExtractor.kt](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/utils/PaletteThemeExtractor.kt)
-- Integrate Android `Palette` library (`androidx.palette:palette-ktx`) to extract vibrant accent colors from active album art or app icons, dynamically tinting audio visualizer bars, progress indicators, and subtle glow shadows.
-
-#### [NEW] [DevicePresets.kt](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/data/DevicePresets.kt)
-- Add pre-calibrated alignment profiles for:
-  - **Motorola Edge 60 Pro** (Default)
-  - **Motorola Edge 50 Ultra / Edge 40 Pro**
-  - **Generic Center Punch-Hole Devices**
-
----
-
-## Verification Plan
-
-### Automated Tests
-- Unit test data model transformations (`IslandModelsTest.kt`).
-- Unit test state transitions and preferences serialization (`PreferencesManagerTest.kt`).
-
-### Manual Verification
-1. Test gesture dismiss & long-press context menu on overlay.
-2. Test dual-island split view when playing music while starting a clock timer.
-3. Test active phone call controls and Bluetooth headset popup banner.
-4. Verify battery consumption metrics using Android Studio Profiler (Energy & CPU consumption when screen is off).
+Now building Phase 1 features...

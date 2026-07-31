@@ -1,6 +1,7 @@
 package com.myisland.dynamic.ui.settings
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,6 +17,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.myisland.dynamic.data.DevicePreset
+import com.myisland.dynamic.data.DevicePresets
 import com.myisland.dynamic.data.IslandConfig
 import com.myisland.dynamic.ui.theme.*
 
@@ -31,6 +34,8 @@ fun SettingsDashboardScreen(
     onRequestOverlayPerm: () -> Unit,
     onRequestNotifPerm: () -> Unit
 ) {
+    var expandedDropdown by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -42,7 +47,7 @@ fun SettingsDashboardScreen(
                             color = TextPrimary
                         )
                         Text(
-                            text = "Motorola Edge 60 Pro",
+                            text = "Multi-Device Dynamic Island",
                             fontSize = 12.sp,
                             color = IslandAccentSecondary
                         )
@@ -99,6 +104,100 @@ fun SettingsDashboardScreen(
                 }
             }
 
+            // Quick Device Presets Section
+            Text(
+                text = "Device Alignment Presets",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = TextSecondary
+            )
+
+            Card(
+                colors = CardDefaults.cardColors(containerColor = DarkSurface),
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "1-Tap Preset Calibration",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        OutlinedButton(
+                            onClick = { expandedDropdown = true },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.PhoneAndroid,
+                                        contentDescription = "Phone",
+                                        tint = IslandAccentSecondary
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = "Select Device Preset",
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                                Icon(
+                                    imageVector = Icons.Default.ArrowDropDown,
+                                    contentDescription = "Dropdown"
+                                )
+                            }
+                        }
+
+                        DropdownMenu(
+                            expanded = expandedDropdown,
+                            onDismissRequest = { expandedDropdown = false },
+                            modifier = Modifier.background(DarkSurfaceVariant)
+                        ) {
+                            DevicePresets.ALL_PRESETS.forEach { preset ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Column {
+                                            Text(
+                                                text = preset.name,
+                                                color = TextPrimary,
+                                                fontWeight = FontWeight.SemiBold
+                                            )
+                                            Text(
+                                                text = "Y: ${preset.config.yOffsetDp}dp | W: ${preset.config.compactWidthDp}dp",
+                                                color = TextMuted,
+                                                fontSize = 11.sp
+                                            )
+                                        }
+                                    },
+                                    onClick = {
+                                        expandedDropdown = false
+                                        onConfigChange(
+                                            config.copy(
+                                                yOffsetDp = preset.config.yOffsetDp,
+                                                compactWidthDp = preset.config.compactWidthDp,
+                                                compactHeightDp = preset.config.compactHeightDp,
+                                                expandedWidthDp = preset.config.expandedWidthDp,
+                                                expandedHeightDp = preset.config.expandedHeightDp,
+                                                cornerRadiusDp = preset.config.cornerRadiusDp
+                                            )
+                                        )
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
             // Permissions Status Section
             Text(
                 text = "Required Permissions",
@@ -121,9 +220,9 @@ fun SettingsDashboardScreen(
                 onRequest = onRequestNotifPerm
             )
 
-            // Punch Hole Calibration Section
+            // Manual Cutout Calibration Section
             Text(
-                text = "Motorola Edge 60 Pro Calibration",
+                text = "Fine-Tune Position & Size",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = TextSecondary
@@ -136,14 +235,13 @@ fun SettingsDashboardScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "Position & Cutout Alignment",
+                        text = "Custom Cutout Alignment",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
                         color = TextPrimary
                     )
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Y Offset Slider (Distance from top)
                     CalibrationSlider(
                         label = "Vertical Offset (Y-Axis)",
                         value = config.yOffsetDp.toFloat(),
@@ -151,7 +249,6 @@ fun SettingsDashboardScreen(
                         onValueChange = { onConfigChange(config.copy(yOffsetDp = it.toInt())) }
                     )
 
-                    // Compact Width Slider
                     CalibrationSlider(
                         label = "Compact Width",
                         value = config.compactWidthDp.toFloat(),
@@ -159,7 +256,6 @@ fun SettingsDashboardScreen(
                         onValueChange = { onConfigChange(config.copy(compactWidthDp = it.toInt())) }
                     )
 
-                    // Compact Height Slider
                     CalibrationSlider(
                         label = "Compact Height",
                         value = config.compactHeightDp.toFloat(),
@@ -167,7 +263,6 @@ fun SettingsDashboardScreen(
                         onValueChange = { onConfigChange(config.copy(compactHeightDp = it.toInt())) }
                     )
 
-                    // Corner Radius Slider
                     CalibrationSlider(
                         label = "Corner Rounding",
                         value = config.cornerRadiusDp.toFloat(),
