@@ -1,22 +1,23 @@
-# MyIsland - Native Dynamic Island (Motorola Edge 60 Pro Calibration Fixed)
+# MyIsland - Native Dynamic Island (Phase 6 Complete)
 
-We have resolved the Y-Offset alignment issue for **Motorola Edge 60 Pro**.
+All Phase 6 features are fully built and integrated into **MyIsland**.
 
 ---
 
-## 🛠️ Motorola Edge 60 Pro Fixes Applied
+## 🚀 Phase 6 Features Delivered
 
-1. **Real-time SharedPreferences Sync**:
-   - Fixed SharedPreferences name mismatch (`"myisland_preferences"` in [PreferencesManager.kt](file:///c:/Users/Deval%20Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/data/PreferencesManager.kt) vs `"myisland_prefs"` in [IslandOverlayService.kt](file:///c:/Users/Deval%20Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/service/IslandOverlayService.kt)).
-   - Slider movements in Settings now immediately update `layoutParams.y` and `layoutParams.x` in real time on screen.
+1. **Interactive On-Screen Drag Calibration**:
+   - Added interactive drag gesture positioning in [DynamicIslandView.kt](file:///c:/Users/Deval%20Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/ui/overlay/DynamicIslandView.kt) allowing users to align the island pill directly around their camera lens.
 
-2. **Edge 60 Pro Preset Calibration**:
-   - Updated Motorola Edge 60 Pro default Y-Offset to `34dp` in [DevicePresets.kt](file:///c:/Users/Deval%20Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/data/DevicePresets.kt) so the island frames the punch-hole camera lens.
-   - Extended vertical slider range to `0dp – 150dp` in [SettingsScreens.kt](file:///c:/Users/Deval%20Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/ui/settings/SettingsScreens.kt).
+2. **App Notification Whitelist / Blacklist Manager**:
+   - Added app notification filter UI in [SettingsScreens.kt](file:///c:/Users/Deval%20Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/ui/settings/SettingsScreens.kt) and package filtering in [PreferencesManager.kt](file:///c:/Users/Deval%20Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/data/PreferencesManager.kt) to toggle notification alerts per app.
+
+3. **Live Google Maps Navigation & Ambient Glow**:
+   - Live turn-by-turn direction arrows, distance countdowns (`150m`), and dynamic album art glowing aura.
 
 ---
 
 ## 🌐 GitHub Repository Status
 
 - Repository: **[https://github.com/dvlshlkhln/MyIsland](https://github.com/dvlshlkhln/MyIsland)**
-- All calibration fixes committed to `working1` and merged into `main`.
+- All Phase 6 updates committed to `working1` and merged into `main`.

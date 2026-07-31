@@ -1,9 +1,13 @@
 package com.myisland.dynamic.ui.settings
 
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -14,12 +18,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.drawable.toBitmap
 import com.myisland.dynamic.data.DevicePreset
 import com.myisland.dynamic.data.DevicePresets
 import com.myisland.dynamic.data.IslandConfig
+import com.myisland.dynamic.data.PreferencesManager
 import com.myisland.dynamic.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,6 +43,9 @@ fun SettingsDashboardScreen(
     onRequestNotifPerm: () -> Unit
 ) {
     var expandedDropdown by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val prefsManager = remember { PreferencesManager(context) }
+    var mutedPackages by remember { mutableStateOf(prefsManager.getMutedPackages()) }
 
     Scaffold(
         topBar = {
@@ -280,9 +291,9 @@ fun SettingsDashboardScreen(
                 }
             }
 
-            // Feature Toggles Section
+            // App Notification Mute Filtering Section
             Text(
-                text = "Dynamic Modules",
+                text = "App Notification Filtering",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = TextSecondary
@@ -293,27 +304,88 @@ fun SettingsDashboardScreen(
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Column(modifier = Modifier.padding(8.dp)) {
-                    FeatureToggleRow(
-                        title = "Music & Media Player",
-                        icon = Icons.Default.MusicNote,
-                        checked = config.isMusicEnabled,
-                        onCheckedChange = { onConfigChange(config.copy(isMusicEnabled = it)) }
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Notification Whitelist / Blacklist",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary
                     )
-                    Divider(color = DarkSurfaceVariant)
-                    FeatureToggleRow(
-                        title = "Charging & Battery Status",
-                        icon = Icons.Default.Bolt,
-                        checked = config.isChargingEnabled,
-                        onCheckedChange = { onConfigChange(config.copy(isChargingEnabled = it)) }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Toggle off any app to block its notifications from appearing in the Dynamic Island.",
+                        fontSize = 12.sp,
+                        color = TextMuted
                     )
-                    Divider(color = DarkSurfaceVariant)
-                    FeatureToggleRow(
-                        title = "App Notifications",
-                        icon = Icons.Default.Notifications,
-                        checked = config.isNotificationsEnabled,
-                        onCheckedChange = { onConfigChange(config.copy(isNotificationsEnabled = it)) }
-                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    val pm = context.packageManager
+                    val installedApps = remember {
+                        try {
+                            pm.getInstalledApplications(PackageManager.GET_META_DATA)
+                                .filter { (it.flags and ApplicationInfo.FLAG_SYSTEM) == 0 }
+                                .take(12)
+                        } catch (e: Exception) {
+                            emptyList()
+                        }
+                    }
+
+                    installedApps.forEach { appInfo ->
+                        val appLabel = pm.getApplicationLabel(appInfo).toString()
+                        val isMuted = mutedPackages.contains(appInfo.packageName)
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 6.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                                val iconBitmap = remember(appInfo.packageName) {
+                                    try {
+                                        pm.getApplicationIcon(appInfo.packageName).toBitmap(64, 64)
+                                    } catch (e: Exception) {
+                                        null
+                                    }
+                                }
+                                if (iconBitmap != null) {
+                                    Image(
+                                        bitmap = iconBitmap.asImageBitmap(),
+                                        contentDescription = appLabel,
+                                        modifier = Modifier
+                                            .size(28.dp)
+                                            .clip(CircleShape)
+                                    )
+                                } else {
+                                    Icon(
+                                        imageVector = Icons.Default.Apps,
+                                        contentDescription = appLabel,
+                                        tint = IslandAccentSecondary,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(
+                                    text = appLabel,
+                                    fontSize = 14.sp,
+                                    color = TextPrimary,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                            Switch(
+                                checked = !isMuted,
+                                onCheckedChange = {
+                                    prefsManager.toggleMutedPackage(appInfo.packageName)
+                                    mutedPackages = prefsManager.getMutedPackages()
+                                },
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = Color.White,
+                                    checkedTrackColor = IslandAccentPrimary
+                                )
+                            )
+                        }
+                    }
                 }
             }
 
@@ -390,36 +462,6 @@ fun CalibrationSlider(
                 thumbColor = IslandAccentSecondary,
                 activeTrackColor = IslandAccentPrimary,
                 inactiveTrackColor = DarkSurfaceVariant
-            )
-        )
-    }
-}
-
-@Composable
-fun FeatureToggleRow(
-    title: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 10.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(imageVector = icon, contentDescription = title, tint = IslandAccentSecondary, modifier = Modifier.size(22.dp))
-            Spacer(modifier = Modifier.width(12.dp))
-            Text(text = title, fontSize = 14.sp, color = TextPrimary, fontWeight = FontWeight.Medium)
-        }
-        Switch(
-            checked = checked,
-            onCheckedChange = onCheckedChange,
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = Color.White,
-                checkedTrackColor = IslandAccentPrimary
             )
         )
     }

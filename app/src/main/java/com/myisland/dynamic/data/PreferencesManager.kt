@@ -21,14 +21,15 @@ class PreferencesManager(context: Context) {
         private const val KEY_NOTIFS_ENABLED = "notifs_enabled"
         private const val KEY_AUTO_COLLAPSE_SEC = "auto_collapse_sec"
         private const val KEY_SERVICE_RUNNING = "service_running"
+        private const val KEY_MUTED_PACKAGES = "muted_packages"
     }
 
     fun getConfig(): IslandConfig {
         return IslandConfig(
-            yOffsetDp = prefs.getInt(KEY_Y_OFFSET, 12),
+            yOffsetDp = prefs.getInt(KEY_Y_OFFSET, 34),
             xOffsetDp = prefs.getInt(KEY_X_OFFSET, 0),
-            compactWidthDp = prefs.getInt(KEY_COMPACT_WIDTH, 190),
-            compactHeightDp = prefs.getInt(KEY_COMPACT_HEIGHT, 38),
+            compactWidthDp = prefs.getInt(KEY_COMPACT_WIDTH, 200),
+            compactHeightDp = prefs.getInt(KEY_COMPACT_HEIGHT, 40),
             expandedWidthDp = prefs.getInt(KEY_EXPANDED_WIDTH, 350),
             expandedHeightDp = prefs.getInt(KEY_EXPANDED_HEIGHT, 170),
             cornerRadiusDp = prefs.getInt(KEY_CORNER_RADIUS, 24),
@@ -62,5 +63,19 @@ class PreferencesManager(context: Context) {
 
     fun setServiceEnabled(enabled: Boolean) {
         prefs.edit().putBoolean(KEY_SERVICE_RUNNING, enabled).apply()
+    }
+
+    fun getMutedPackages(): Set<String> {
+        return prefs.getStringSet(KEY_MUTED_PACKAGES, emptySet()) ?: emptySet()
+    }
+
+    fun toggleMutedPackage(packageName: String) {
+        val set = getMutedPackages().toMutableSet()
+        if (set.contains(packageName)) {
+            set.remove(packageName)
+        } else {
+            set.add(packageName)
+        }
+        prefs.edit().putStringSet(KEY_MUTED_PACKAGES, set).apply()
     }
 }

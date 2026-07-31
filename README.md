@@ -16,7 +16,7 @@ Every commit pushed or merged into the `main` branch automatically triggers GitH
 
 ## ✨ Features
 
-- 📱 **Motorola Edge 60 Pro Camera Cutout Calibration Fix**: Fixed SharedPreferences name mismatch (`myisland_preferences`) so Y-Offset & X-Offset sliders immediately move the island on screen in real time. Updated Motorola Edge 60 Pro default Y-Offset to 34dp and expanded vertical slider range (0–150dp).
+- 📱 **Interactive Drag Calibration & App Whitelist Manager**: Touch-drag positioning calibration directly around your camera cutout with live DP coordinates, plus a granular app notification whitelist/blacklist manager in Settings.
 - 🗺️ **Live Google Maps & Waze Turn-by-Turn Navigation**: Intercepts navigation directions, rendering real-time direction arrows (Turn Left, Turn Right, U-Turn), distance countdown (`150m`), and upcoming street names directly in the island pill.
 - ✨ **Ambient Accent Aura Glow**: Glassmorphic glowing shadow aura around the island container dynamically tinted by album artwork or app branding color.
 - 👯 **Dual-Pill Split Sub-Pill Architecture (iOS Multi-Session)**: When music and a countdown timer run simultaneously, the island splits organically into a main left pill and a secondary detached right sub-pill.

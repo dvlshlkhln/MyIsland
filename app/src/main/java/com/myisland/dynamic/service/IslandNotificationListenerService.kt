@@ -8,11 +8,14 @@ import android.service.notification.StatusBarNotification
 import com.myisland.dynamic.data.NavigationDirection
 import com.myisland.dynamic.data.NavigationState
 import com.myisland.dynamic.data.NotificationItem
+import com.myisland.dynamic.data.PreferencesManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class IslandNotificationListenerService : NotificationListenerService() {
+
+    private lateinit var prefsManager: PreferencesManager
 
     companion object {
         private val _latestNotification = MutableStateFlow<NotificationItem?>(null)
@@ -29,6 +32,11 @@ class IslandNotificationListenerService : NotificationListenerService() {
         }
     }
 
+    override fun onCreate() {
+        super.onCreate()
+        prefsManager = PreferencesManager(this)
+    }
+
     override fun onListenerConnected() {
         super.onListenerConnected()
         val componentName = ComponentName(this, IslandNotificationListenerService::class.java)
@@ -43,6 +51,11 @@ class IslandNotificationListenerService : NotificationListenerService() {
 
         val pkg = sbn.packageName
         if (pkg == packageName) return
+
+        // Check if package is muted by user
+        if (::prefsManager.isInitialized && prefsManager.getMutedPackages().contains(pkg)) {
+            return
+        }
 
         val extras = sbn.notification.extras
         val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString() ?: ""

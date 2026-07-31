@@ -6,13 +6,17 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -47,6 +51,8 @@ fun DynamicIslandView(
     bluetoothState: BluetoothDeviceState = BluetoothDeviceState(),
     volumeRingerState: VolumeRingerState = VolumeRingerState(),
     navigationState: NavigationState = NavigationState(),
+    isCalibrationMode: Boolean = false,
+    onPositionDragged: (Int, Int) -> Unit = { _, _ -> },
     onToggleExpand: () -> Unit,
     onPlayPauseToggle: () -> Unit,
     onSkipNext: () -> Unit,
@@ -66,15 +72,12 @@ fun DynamicIslandView(
 
     var showQuickActionMenu by remember { mutableStateOf(false) }
 
-    // Check if two sessions are running simultaneously for Dual-Pill Split Mode
     val isDualSession = (mediaState.isPlaying || mediaState.albumArt != null) && timerState.isRunning && mode == IslandMode.COMPACT
 
-    // Dynamic Palette Extractor
     val paletteColors = remember(mediaState.albumArt, notification?.icon) {
         PaletteThemeExtractor.extractColors(mediaState.albumArt ?: notification?.icon)
     }
 
-    // Swipe Left Gesture State
     var dragXOffset by remember { mutableFloatStateOf(0f) }
     val animatedDragX by animateFloatAsState(
         targetValue = dragXOffset,
@@ -106,7 +109,6 @@ fun DynamicIslandView(
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (mode != IslandMode.HIDDEN) {
-            // Main Island Pill with Ambient Accent Glow Aura
             Box(
                 modifier = Modifier
                     .offset(x = (config.xOffsetDp + (animatedDragX / density)).dp)
@@ -116,8 +118,8 @@ fun DynamicIslandView(
                     .shadow(
                         elevation = 20.dp,
                         shape = RoundedCornerShape(config.cornerRadiusDp.dp),
-                        spotColor = if (navigationState.isNavigating) Color(0xFF00CEC9) else paletteColors.vibrantAccent,
-                        ambientColor = if (navigationState.isNavigating) Color(0xFF00CEC9) else paletteColors.vibrantAccent
+                        spotColor = if (isCalibrationMode) Color(0xFFFF7675) else if (navigationState.isNavigating) Color(0xFF00CEC9) else paletteColors.vibrantAccent,
+                        ambientColor = if (isCalibrationMode) Color(0xFFFF7675) else if (navigationState.isNavigating) Color(0xFF00CEC9) else paletteColors.vibrantAccent
                     )
                     .clip(RoundedCornerShape(config.cornerRadiusDp.dp))
                     .background(PureBlack)
@@ -127,107 +129,131 @@ fun DynamicIslandView(
                             stiffness = Spring.StiffnessMediumLow
                         )
                     )
-                    .pointerInput(Unit) {
-                        detectTapGestures(
-                            onTap = {
-                                hapticManager.performClickHaptic()
-                                showQuickActionMenu = false
-                                onToggleExpand()
-                            },
-                            onLongPress = {
-                                hapticManager.performHeavyHaptic()
-                                showQuickActionMenu = true
-                                if (mode != IslandMode.EXPANDED) {
+                    .pointerInput(isCalibrationMode) {
+                        if (isCalibrationMode) {
+                            detectDragGestures { change, dragAmount ->
+                                change.consume()
+                                val deltaX = (dragAmount.x / density).toInt()
+                                val deltaY = (dragAmount.y / density).toInt()
+                                onPositionDragged(config.xOffsetDp + deltaX, config.yOffsetDp + deltaY)
+                            }
+                        } else {
+                            detectTapGestures(
+                                onTap = {
+                                    hapticManager.performClickHaptic()
+                                    showQuickActionMenu = false
                                     onToggleExpand()
-                                }
-                            }
-                        )
-                    }
-                    .pointerInput(Unit) {
-                        detectHorizontalDragGestures(
-                            onDragEnd = {
-                                if (dragXOffset < -100f) {
+                                },
+                                onLongPress = {
                                     hapticManager.performHeavyHaptic()
-                                    onSwipeLeftDismiss()
+                                    showQuickActionMenu = true
+                                    if (mode != IslandMode.EXPANDED) {
+                                        onToggleExpand()
+                                    }
                                 }
-                                dragXOffset = 0f
-                            },
-                            onDragCancel = { dragXOffset = 0f },
-                            onHorizontalDrag = { _, dragAmount ->
-                                if (dragAmount < 0 || dragXOffset < 0) { // Drag Left
-                                    dragXOffset = (dragXOffset + dragAmount).coerceIn(-300f, 0f)
+                            )
+                        }
+                    }
+                    .pointerInput(isCalibrationMode) {
+                        if (!isCalibrationMode) {
+                            detectHorizontalDragGestures(
+                                onDragEnd = {
+                                    if (dragXOffset < -100f) {
+                                        hapticManager.performHeavyHaptic()
+                                        onSwipeLeftDismiss()
+                                    }
+                                    dragXOffset = 0f
+                                },
+                                onDragCancel = { dragXOffset = 0f },
+                                onHorizontalDrag = { _, dragAmount ->
+                                    if (dragAmount < 0 || dragXOffset < 0) {
+                                        dragXOffset = (dragXOffset + dragAmount).coerceIn(-300f, 0f)
+                                    }
                                 }
-                            }
-                        )
+                            )
+                        }
                     }
             ) {
-                when (mode) {
-                    IslandMode.COMPACT -> {
-                        CompactPillContent(
-                            mediaState = mediaState,
-                            notification = notification,
-                            chargingState = chargingState,
-                            callState = callState,
-                            timerState = timerState,
-                            bluetoothState = bluetoothState,
-                            volumeRingerState = volumeRingerState,
-                            navigationState = navigationState,
-                            paletteColors = paletteColors
+                if (isCalibrationMode) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Drag To Align • Y:${config.yOffsetDp}dp",
+                            color = Color(0xFFFF7675),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold
                         )
                     }
-                    IslandMode.EXPANDED -> {
-                        ExpandedCardContent(
-                            mediaState = mediaState,
-                            notification = notification,
-                            chargingState = chargingState,
-                            callState = callState,
-                            timerState = timerState,
-                            bluetoothState = bluetoothState,
-                            navigationState = navigationState,
-                            paletteColors = paletteColors,
-                            showQuickActionMenu = showQuickActionMenu,
-                            onPlayPauseToggle = {
-                                hapticManager.performClickHaptic()
-                                onPlayPauseToggle()
-                            },
-                            onSkipNext = {
-                                hapticManager.performClickHaptic()
-                                onSkipNext()
-                            },
-                            onSkipPrevious = {
-                                hapticManager.performClickHaptic()
-                                onSkipPrevious()
-                            },
-                            onDismiss = {
-                                hapticManager.performHeavyHaptic()
-                                showQuickActionMenu = false
-                                onDismiss()
-                            },
-                            onEndCall = {
-                                hapticManager.performHeavyHaptic()
-                                onEndCall()
-                            },
-                            onToggleMuteCall = {
-                                hapticManager.performClickHaptic()
-                                onToggleMuteCall()
-                            },
-                            onAddTimerMinute = {
-                                hapticManager.performClickHaptic()
-                                onAddTimerMinute()
-                            },
-                            onToggleTorch = onToggleTorch,
-                            onToggleAudioOutput = onToggleAudioOutput,
-                            onMuteActiveApp = onMuteActiveApp
-                        )
+                } else {
+                    when (mode) {
+                        IslandMode.COMPACT -> {
+                            CompactPillContent(
+                                mediaState = mediaState,
+                                notification = notification,
+                                chargingState = chargingState,
+                                callState = callState,
+                                timerState = timerState,
+                                bluetoothState = bluetoothState,
+                                volumeRingerState = volumeRingerState,
+                                navigationState = navigationState,
+                                paletteColors = paletteColors
+                            )
+                        }
+                        IslandMode.EXPANDED -> {
+                            ExpandedCardContent(
+                                mediaState = mediaState,
+                                notification = notification,
+                                chargingState = chargingState,
+                                callState = callState,
+                                timerState = timerState,
+                                bluetoothState = bluetoothState,
+                                navigationState = navigationState,
+                                paletteColors = paletteColors,
+                                showQuickActionMenu = showQuickActionMenu,
+                                onPlayPauseToggle = {
+                                    hapticManager.performClickHaptic()
+                                    onPlayPauseToggle()
+                                },
+                                onSkipNext = {
+                                    hapticManager.performClickHaptic()
+                                    onSkipNext()
+                                },
+                                onSkipPrevious = {
+                                    hapticManager.performClickHaptic()
+                                    onSkipPrevious()
+                                },
+                                onDismiss = {
+                                    hapticManager.performHeavyHaptic()
+                                    showQuickActionMenu = false
+                                    onDismiss()
+                                },
+                                onEndCall = {
+                                    hapticManager.performHeavyHaptic()
+                                    onEndCall()
+                                },
+                                onToggleMuteCall = {
+                                    hapticManager.performClickHaptic()
+                                    onToggleMuteCall()
+                                },
+                                onAddTimerMinute = {
+                                    hapticManager.performClickHaptic()
+                                    onAddTimerMinute()
+                                },
+                                onToggleTorch = onToggleTorch,
+                                onToggleAudioOutput = onToggleAudioOutput,
+                                onMuteActiveApp = onMuteActiveApp
+                            )
+                        }
+                        IslandMode.TOAST -> {
+                            ExpandedChargingView(chargingState = chargingState)
+                        }
+                        else -> {}
                     }
-                    IslandMode.TOAST -> {
-                        ExpandedChargingView(chargingState = chargingState)
-                    }
-                    else -> {}
                 }
             }
 
-            // Secondary Detached Sub-Pill (iOS Dual-Pill Architecture)
             if (isDualSession) {
                 Spacer(modifier = Modifier.width(10.dp))
 
@@ -248,7 +274,6 @@ fun DynamicIslandView(
                     contentAlignment = Alignment.Center
                 ) {
                     val mins = timerState.remainingSeconds / 60
-                    val secs = timerState.remainingSeconds % 60
                     Text(
                         text = String.format("%02d", mins),
                         color = Color(0xFFFDCB6E),
