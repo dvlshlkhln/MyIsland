@@ -1,98 +1,100 @@
-# Native Android Dynamic Island App ("MyIsland") for Motorola Edge 60 Pro
+# Phased Enhancement Roadmap for MyIsland (Motorola Edge 60 Pro)
 
-Create a native Android application in Kotlin using Jetpack Compose and System Overlay Services (`TYPE_APPLICATION_OVERLAY`) to imitate the iOS Dynamic Island functionality, tailored specifically for the Motorola Edge 60 Pro punch-hole camera display.
+An extensive multi-phase engineering plan to evolve **MyIsland** into a feature-complete, highly polished, and low-power native Android Dynamic Island implementation.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> **Android Permissions Required**: System Overlays (`SYSTEM_ALERT_WINDOW`) and Notification Listener (`BIND_NOTIFICATION_LISTENER_SERVICE`) require manual user approval via Android System Settings. The app includes a step-by-step Onboarding UI to guide you through granting these permissions effortlessly.
+> **Phase Prioritization**: The proposed roadmap is broken into 4 distinct phases. Please review the proposed phases below and let us know which phase you would like us to begin implementing first!
 
 > [!NOTE]
-> **Motorola Edge 60 Pro Cutout Alignment**: The app features a live visual calibration slider to fine-tune the pill's X/Y offset, width, and height directly over your Motorola Edge 60 Pro's center punch-hole camera.
-
-## Open Questions
-
-None at this time. The default configuration is pre-configured for center punch-hole displays with full customization controls.
-
-## Proposed Changes
-
-### Project Foundation & Build System
-
-#### [NEW] [settings.gradle.kts](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/settings.gradle.kts)
-- Configure Gradle plugin repositories and app module includes.
-
-#### [NEW] [build.gradle.kts](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/build.gradle.kts)
-- Root build script with Kotlin 1.9+ and Android Gradle Plugin 8.x configuration.
-
-#### [NEW] [app/build.gradle.kts](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/build.gradle.kts)
-- App dependencies: Jetpack Compose (Material3, Animations), Lifecycle Service, Coroutines, MediaController, Accompanist/Core KTX.
+> All new features will retain backwards compatibility with your current Motorola Edge 60 Pro calibration settings and persistent configuration.
 
 ---
 
-### Android Manifest & Core Application Structure
+## Roadmap Overview & Technical Breakdown
 
-#### [NEW] [app/src/main/AndroidManifest.xml](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/AndroidManifest.xml)
-- Declare permissions: `SYSTEM_ALERT_WINDOW`, `BIND_NOTIFICATION_LISTENER_SERVICE`, `POST_NOTIFICATIONS`, `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_SPECIAL_USE`.
-- Register `MainActivity`, `IslandOverlayService`, `IslandNotificationListenerService`, and broadcast receivers.
-
----
-
-### Services & Data Logic (Kotlin Core)
-
-#### [NEW] [app/src/main/java/com/myisland/dynamic/data/IslandModels.kt](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/data/IslandModels.kt)
-- Define `IslandState` (Idle, CompactPill, ExpandedCard, ToastBanner), `MediaState` (track title, artist, album art, duration, position, isPlaying), `NotificationItem` (app icon, title, text, timestamp), and `IslandConfig` (position, size, features enabled).
-
-#### [NEW] [app/src/main/java/com/myisland/dynamic/data/PreferencesManager.kt](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/data/PreferencesManager.kt)
-- Persistent settings storage using `SharedPreferences` / `DataStore` for cutout offset (X, Y, Width, Height), animation speeds, and enabled modules.
-
-#### [NEW] [app/src/main/java/com/myisland/dynamic/service/IslandOverlayService.kt](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/service/IslandOverlayService.kt)
-- Foreground Service managing the `WindowManager` overlay view.
-- Embeds Compose `ComposeView` with `TYPE_APPLICATION_OVERLAY`.
-- Handles interactive window layout updates (touch passthrough when collapsed, intercept touch when expanded).
-
-#### [NEW] [app/src/main/java/com/myisland/dynamic/service/IslandNotificationListenerService.kt](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/service/IslandNotificationListenerService.kt)
-- Binds to Android system notifications to stream real-time incoming alerts, active timers, incoming calls, and messaging notifications to the Dynamic Island.
-
-#### [NEW] [app/src/main/java/com/myisland/dynamic/service/MediaSessionManager.kt](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/service/MediaSessionManager.kt)
-- Listens to active Android `MediaSessionController` (Spotify, YouTube Music, Apple Music, etc.) to capture album artwork, title, playback state, and provide play/pause/skip actions.
-
-#### [NEW] [app/src/main/java/com/myisland/dynamic/service/SystemEventReceiver.kt](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/service/SystemEventReceiver.kt)
-- Receives broadcast events for charging connected/disconnected, battery low, volume/ringer state changes, and bluetooth connection.
+```mermaid
+graph TD
+    A[Current Core Service] --> B[Phase 1: UX & Interactive Gestures]
+    B --> C[Phase 2: Calls, Timers & Hardware Events]
+    C --> D[Phase 3: Smart Battery & System Performance]
+    D --> E[Phase 4: Palette Theme Engine & Device Presets]
+```
 
 ---
 
-### Jetpack Compose UI (Overlay & Settings App)
+## Proposed Phases
 
-#### [NEW] [app/src/main/java/com/myisland/dynamic/ui/overlay/DynamicIslandView.kt](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/ui/overlay/DynamicIslandView.kt)
-- Main Compose overlay surface with fluid spring animation transitions between Compact Pill, Expanded Card, and Quick Toast states.
+### Phase 1: Interactive Gestures, Dual-Island Split & Haptic Feedback
 
-#### [NEW] [app/src/main/java/com/myisland/dynamic/ui/overlay/CompactPillContent.kt](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/ui/overlay/CompactPillContent.kt)
-- Mini status elements (music visualizer, animated battery indicator, app icon badges, timer indicator).
+Focuses on fluid touch interactions, multi-tasking island split views, and tactile haptics.
 
-#### [NEW] [app/src/main/java/com/myisland/dynamic/ui/overlay/ExpandedCardContent.kt](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/ui/overlay/ExpandedCardContent.kt)
-- Detailed rich cards: Full Media Player (Album Art, Seek Bar, Controls), Detailed Notification Card with quick actions, Charging Status banner.
+#### [MODIFY] [DynamicIslandView.kt](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/ui/overlay/DynamicIslandView.kt)
+- Add gesture detectors:
+  - **Swipe Left/Right**: Collapse or temporarily dismiss pill with a smooth spring exit animation.
+  - **Long Press**: Open a context action popup menu (quick output device switch, notification mute).
+- Implement **Dual-Island Split Architecture**:
+  - When two simultaneous background activities occur (e.g. Spotify playing + Active Clock Timer), split into a primary main island + a secondary detached small bubble beside the camera.
 
-#### [NEW] [app/src/main/java/com/myisland/dynamic/ui/settings/MainActivity.kt](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/ui/settings/MainActivity.kt)
-- Main setup application entry point written in Jetpack Compose with Material3 dark theme.
+#### [NEW] [HapticManager.kt](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/utils/HapticManager.kt)
+- Integrate Android `Vibrator` and `VibrationEffect.createPredefined` for subtle haptic clicks when expanding/collapsing the island or pressing media controls.
 
-#### [NEW] [app/src/main/java/com/myisland/dynamic/ui/settings/SettingsScreens.kt](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/ui/settings/SettingsScreens.kt)
-- Tabbed settings screens:
-  1. **Dashboard & Service Toggle**: Quick Start/Stop toggle with service status indicator.
-  2. **Camera Cutout Calibration**: Sliders for X Position, Y Offset, Width, Height, Corner Radius with live on-screen overlay preview.
-  3. **Permission Setup Wizard**: Direct buttons to enable Overlay permission & Notification Listener.
-  4. **Feature Toggles**: Customize active widgets (Music, Charging, Notifications, Gestures).
+---
+
+### Phase 2: Live Phone Calls, Active Timers & Bluetooth Headset Banners
+
+Expands system event observers to support native phone calls, timers, and connected Bluetooth accessories.
+
+#### [NEW] [CallSessionManager.kt](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/service/CallSessionManager.kt)
+- Intercept incoming and active phone calls via `TelecomManager` / `PhoneStateListener`.
+- Display caller contact name, avatar, live call timer, and interactive Mute / End Call buttons in expanded mode.
+
+#### [NEW] [TimerSessionManager.kt](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/service/TimerSessionManager.kt)
+- Read active system clock timers & stopwatches to show a live circular countdown progress ring around the island.
+
+#### [NEW] [BluetoothEventReceiver.kt](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/service/BluetoothEventReceiver.kt)
+- Listen for Bluetooth headphone / accessory connections (`ACTION_AUDIO_STATE_CHANGED`).
+- Show animated connection banner displaying connected device name (e.g., Moto Buds, Galaxy Buds, AirPods) and battery status.
+
+#### [MODIFY] [ExpandedCardContent.kt](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/ui/overlay/ExpandedCardContent.kt)
+- Add quick inline reply input field for messaging notifications (WhatsApp, Telegram, SMS).
+
+---
+
+### Phase 3: Smart Battery Throttling & Power Optimization
+
+Ensures zero background battery drain when the device is idle or screen is off.
+
+#### [MODIFY] [IslandOverlayService.kt](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/service/IslandOverlayService.kt)
+- Register `ScreenStateReceiver` (`ACTION_SCREEN_OFF` / `ACTION_SCREEN_ON`).
+- Automatically suspend Compose rendering pipelines and detach `ComposeView` draw calls when the display turns off, achieving **0.0% standby battery consumption**.
+
+---
+
+### Phase 4: Dynamic Palette Theme Engine & Hardware Presets
+
+Personalizes visual aesthetics based on active app album artwork and device models.
+
+#### [NEW] [PaletteThemeExtractor.kt](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/utils/PaletteThemeExtractor.kt)
+- Integrate Android `Palette` library (`androidx.palette:palette-ktx`) to extract vibrant accent colors from active album art or app icons, dynamically tinting audio visualizer bars, progress indicators, and subtle glow shadows.
+
+#### [NEW] [DevicePresets.kt](file:///c:/Users/Deval/Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/data/DevicePresets.kt)
+- Add pre-calibrated alignment profiles for:
+  - **Motorola Edge 60 Pro** (Default)
+  - **Motorola Edge 50 Ultra / Edge 40 Pro**
+  - **Generic Center Punch-Hole Devices**
 
 ---
 
 ## Verification Plan
 
+### Automated Tests
+- Unit test data model transformations (`IslandModelsTest.kt`).
+- Unit test state transitions and preferences serialization (`PreferencesManagerTest.kt`).
+
 ### Manual Verification
-1. Open the project in Android Studio or build APK.
-2. Launch **MyIsland** app on Motorola Edge 60 Pro (or emulator).
-3. Grant **Display Over Apps** and **Notification Access** permissions via the onboarding screen.
-4. Toggle the service **ON**.
-5. Adjust position sliders to align the pill surrounding the Motorola Edge 60 Pro punch-hole camera.
-6. Test features:
-   - Play music in Spotify / YouTube Music -> observe Dynamic Island compact music visualizer & tap to expand player controls.
-   - Plug in charger -> observe dynamic charging animation & battery percentage toast.
-   - Send test notification -> observe floating notification bubble expanding from camera cutout.
+1. Test gesture dismiss & long-press context menu on overlay.
+2. Test dual-island split view when playing music while starting a clock timer.
+3. Test active phone call controls and Bluetooth headset popup banner.
+4. Verify battery consumption metrics using Android Studio Profiler (Energy & CPU consumption when screen is off).
