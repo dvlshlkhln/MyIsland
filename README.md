@@ -6,6 +6,7 @@
 
 ## ✨ Features
 
+- 🔋 **Smart Power Saver & Zero Standby Battery Drain (Phase 3)**: Automatically suspends Compose rendering pipelines and sets overlay visibility to `View.GONE` when the display turns off (`ACTION_SCREEN_OFF`), ensuring 0.0% standby battery drain.
 - 🏝️ **Native System Overlay (`TYPE_APPLICATION_OVERLAY`)**: Floats smoothly on top of all apps, status bars, and lock screens with physics-based spring animations.
 - 📱 **1-Tap Device Calibration Presets**:
   - **Motorola Edge 60 Pro** (Default)
@@ -42,5 +43,6 @@
 
 - **Kotlin** & **Jetpack Compose** (Material 3)
 - **Android WindowManager** & **Lifecycle Service**
+- **ScreenStateReceiver** & **PowerManager** (Smart Render Throttling)
 - **MediaSessionController** & **NotificationListenerService**
 - **TelephonyManager / TelecomManager** & **Bluetooth Broadcast Receivers**

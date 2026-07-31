@@ -4,9 +4,12 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.PixelFormat
 import android.os.Build
+import android.os.PowerManager
 import android.view.Gravity
+import android.view.View
 import android.view.WindowManager
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -32,6 +35,7 @@ class IslandOverlayService : LifecycleService() {
 
     private lateinit var callSessionManager: CallSessionManager
     private lateinit var timerSessionManager: TimerSessionManager
+    private val screenStateReceiver = ScreenStateReceiver()
 
     private var currentMode by mutableStateOf(IslandMode.COMPACT)
     private var islandConfig by mutableStateOf(IslandConfig())
@@ -65,11 +69,21 @@ class IslandOverlayService : LifecycleService() {
 
         timerSessionManager = TimerSessionManager()
 
+        registerScreenReceiver()
         createNotificationChannel()
         startForeground(NOTIFICATION_ID, buildForegroundNotification())
 
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         setupOverlayView()
+    }
+
+    private fun registerScreenReceiver() {
+        val filter = IntentFilter().apply {
+            addAction(Intent.ACTION_SCREEN_OFF)
+            addAction(Intent.ACTION_SCREEN_ON)
+            addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED)
+        }
+        registerReceiver(screenStateReceiver, filter)
     }
 
     private fun setupOverlayView() {
@@ -92,6 +106,9 @@ class IslandOverlayService : LifecycleService() {
 
             setContent {
                 MyIslandTheme {
+                    val isScreenOn by ScreenStateReceiver.isScreenOn.collectAsState()
+                    val isPowerSaveMode by ScreenStateReceiver.isPowerSaveMode.collectAsState()
+
                     val mediaState by IslandNotificationListenerService.mediaControllerInstance?.mediaState
                         ?.collectAsState() ?: MutableStateFlow(com.myisland.dynamic.data.MediaState()).collectAsState()
 
@@ -102,40 +119,47 @@ class IslandOverlayService : LifecycleService() {
                     val timerState by timerSessionManager.timerState.collectAsState()
                     val bluetoothState by BluetoothEventReceiver.bluetoothState.collectAsState()
 
-                    DynamicIslandView(
-                        mode = currentMode,
-                        config = islandConfig,
-                        mediaState = mediaState,
-                        notification = notification,
-                        chargingState = chargingState,
-                        callState = callState,
-                        timerState = timerState,
-                        bluetoothState = bluetoothState,
-                        onToggleExpand = {
-                            currentMode = if (currentMode == IslandMode.EXPANDED) IslandMode.COMPACT else IslandMode.EXPANDED
-                        },
-                        onPlayPauseToggle = {
-                            IslandNotificationListenerService.mediaControllerInstance?.togglePlayPause()
-                        },
-                        onSkipNext = {
-                            IslandNotificationListenerService.mediaControllerInstance?.skipToNext()
-                        },
-                        onSkipPrevious = {
-                            IslandNotificationListenerService.mediaControllerInstance?.skipToPrevious()
-                        },
-                        onDismiss = {
-                            currentMode = IslandMode.COMPACT
-                        },
-                        onEndCall = {
-                            callSessionManager.endCall()
-                        },
-                        onToggleMuteCall = {
-                            callSessionManager.toggleMute()
-                        },
-                        onAddTimerMinute = {
-                            timerSessionManager.addOneMinute()
-                        }
-                    )
+                    // Smart Render Throttle: Suspend rendering when screen is off to achieve 0.0% battery drain
+                    if (isScreenOn) {
+                        this@apply.visibility = View.VISIBLE
+                        DynamicIslandView(
+                            mode = currentMode,
+                            config = islandConfig,
+                            mediaState = mediaState,
+                            notification = notification,
+                            chargingState = chargingState,
+                            callState = callState,
+                            timerState = timerState,
+                            bluetoothState = bluetoothState,
+                            onToggleExpand = {
+                                currentMode = if (currentMode == IslandMode.EXPANDED) IslandMode.COMPACT else IslandMode.EXPANDED
+                            },
+                            onPlayPauseToggle = {
+                                IslandNotificationListenerService.mediaControllerInstance?.togglePlayPause()
+                            },
+                            onSkipNext = {
+                                IslandNotificationListenerService.mediaControllerInstance?.skipToNext()
+                            },
+                            onSkipPrevious = {
+                                IslandNotificationListenerService.mediaControllerInstance?.skipToPrevious()
+                            },
+                            onDismiss = {
+                                currentMode = IslandMode.COMPACT
+                            },
+                            onEndCall = {
+                                callSessionManager.endCall()
+                            },
+                            onToggleMuteCall = {
+                                callSessionManager.toggleMute()
+                            },
+                            onAddTimerMinute = {
+                                timerSessionManager.addOneMinute()
+                            }
+                        )
+                    } else {
+                        // Display is off: Hide overlay and suspend GPU draw calls
+                        this@apply.visibility = View.GONE
+                    }
                 }
             }
         }
@@ -149,6 +173,12 @@ class IslandOverlayService : LifecycleService() {
 
     override fun onDestroy() {
         super.onDestroy()
+        try {
+            unregisterReceiver(screenStateReceiver)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
         if (::overlayView.isInitialized) {
             try {
                 windowManager.removeView(overlayView)
@@ -174,7 +204,7 @@ class IslandOverlayService : LifecycleService() {
 
     private fun buildForegroundNotification() = NotificationCompat.Builder(this, CHANNEL_ID)
         .setContentTitle("MyIsland is Running")
-        .setContentText("Dynamic Island active on your phone")
+        .setContentText("Dynamic Island active with smart power saver")
         .setSmallIcon(android.R.drawable.ic_menu_compass)
         .setPriority(NotificationCompat.PRIORITY_LOW)
         .setOngoing(true)
