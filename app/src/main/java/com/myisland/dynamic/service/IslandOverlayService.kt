@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.PixelFormat
 import android.os.Build
+import android.os.Bundle
 import android.os.PowerManager
 import android.view.Gravity
 import android.view.View
@@ -19,6 +20,9 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.savedstate.SavedStateRegistry
+import androidx.savedstate.SavedStateRegistryController
+import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.myisland.dynamic.data.IslandConfig
 import com.myisland.dynamic.data.IslandMode
@@ -27,7 +31,12 @@ import com.myisland.dynamic.ui.overlay.DynamicIslandView
 import com.myisland.dynamic.ui.theme.MyIslandTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class IslandOverlayService : LifecycleService() {
+class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
+
+    private val savedStateRegistryController = SavedStateRegistryController.create(this)
+
+    override val savedStateRegistry: SavedStateRegistry
+        get() = savedStateRegistryController.savedStateRegistry
 
     private lateinit var windowManager: WindowManager
     private lateinit var overlayView: ComposeView
@@ -61,6 +70,8 @@ class IslandOverlayService : LifecycleService() {
 
     override fun onCreate() {
         super.onCreate()
+        savedStateRegistryController.performRestore(null)
+
         prefsManager = PreferencesManager(this)
         islandConfig = prefsManager.getConfig()
 
