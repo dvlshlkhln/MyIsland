@@ -6,3 +6,7 @@
 
 ## README Auto-Update Rule
 - Whenever new features, device presets, permissions, or system capabilities are implemented or updated in the project, ALWAYS update the `README.md` file in the root directory to accurately reflect the latest project features, setup steps, and device compatibility.
+
+## Branch & Release Workflow Rule
+- Use `working1` as the active development branch for updates, bug fixes, and feature additions.
+- Only merge feature branches into `main` when ready to trigger the automatic GitHub Actions APK build workflow (`.github/workflows/android-build.yml`).

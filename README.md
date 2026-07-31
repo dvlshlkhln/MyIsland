@@ -1,13 +1,25 @@
 # MyIsland - Native Dynamic Island for Motorola & Samsung Devices
 
+[![Android CI - Auto Build APK](https://github.com/dvlshlkhln/MyIsland/actions/workflows/android-build.yml/badge.svg)](https://github.com/dvlshlkhln/MyIsland/actions/workflows/android-build.yml)
+
 **MyIsland** is a native Android application built in **Kotlin** with **Jetpack Compose** that brings the iOS Dynamic Island experience to Android smartphones, framed seamlessly around center punch-hole camera cutouts.
+
+---
+
+## 📥 Automated APK Builds
+
+Every commit pushed or merged into the `main` branch automatically triggers GitHub Actions CI to compile and publish the latest downloadable APK.
+
+- Go to **[GitHub Actions Artifacts](https://github.com/dvlshlkhln/MyIsland/actions)** to download the latest compiled `MyIsland-debug.apk`.
 
 ---
 
 ## ✨ Features
 
-- 🎨 **Dynamic Palette Accent Engine (Phase 4)**: Real-time album cover artwork & app icon color extraction via Android `Palette` API. Automatically tints progress bars, play buttons, visualizer bars, and floating island glowing shadows to match active media.
-- 🔋 **Smart Power Saver & Zero Standby Battery Drain (Phase 3)**: Automatically suspends Compose rendering pipelines and sets overlay visibility to `View.GONE` when the display turns off (`ACTION_SCREEN_OFF`), ensuring 0.0% standby battery drain.
+- ⚙️ **Automated CI/CD APK Build**: Built-in `.github/workflows/android-build.yml` compiles APKs automatically on `main`.
+- 🌿 **Branch Management**: Active development takes place on the `working1` branch before merging into `main`.
+- 🎨 **Dynamic Palette Accent Engine**: Real-time album cover artwork & app icon color extraction via Android `Palette` API. Automatically tints progress bars, play buttons, visualizer bars, and floating island glowing shadows to match active media.
+- 🔋 **Smart Power Saver & Zero Standby Battery Drain**: Automatically suspends Compose rendering pipelines and sets overlay visibility to `View.GONE` when the display turns off (`ACTION_SCREEN_OFF`), ensuring 0.0% standby battery drain.
 - 🏝️ **Native System Overlay (`TYPE_APPLICATION_OVERLAY`)**: Floats smoothly on top of all apps, status bars, and lock screens with physics-based spring animations.
 - 📱 **1-Tap Device Calibration Presets**:
   - **Motorola Edge 60 Pro** (Default)
@@ -43,6 +55,7 @@
 ## 🛠️ Built With
 
 - **Kotlin** & **Jetpack Compose** (Material 3)
+- **GitHub Actions CI/CD** (Automated APK Compiler)
 - **Android WindowManager** & **Lifecycle Service**
 - **Android Palette API (`androidx.palette:palette-ktx`)** (Dynamic Accent Engine)
 - **ScreenStateReceiver** & **PowerManager** (Smart Render Throttling)
