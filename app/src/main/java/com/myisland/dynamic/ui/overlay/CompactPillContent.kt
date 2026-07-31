@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.myisland.dynamic.data.*
 import com.myisland.dynamic.ui.theme.VibrantGreen
+import com.myisland.dynamic.utils.IslandPaletteColors
 
 @Composable
 fun CompactPillContent(
@@ -31,6 +32,7 @@ fun CompactPillContent(
     callState: CallState = CallState(),
     timerState: TimerState = TimerState(),
     bluetoothState: BluetoothDeviceState = BluetoothDeviceState(),
+    paletteColors: IslandPaletteColors = IslandPaletteColors(),
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -79,7 +81,7 @@ fun CompactPillContent(
                 Icon(
                     imageVector = Icons.Default.MusicNote,
                     contentDescription = "Playing Music",
-                    tint = Color(0xFFA29BFE),
+                    tint = paletteColors.vibrantAccent,
                     modifier = Modifier.size(20.dp)
                 )
             } else if (notification != null) {
@@ -151,7 +153,7 @@ fun CompactPillContent(
                     fontWeight = FontWeight.SemiBold
                 )
             } else if (mediaState.isPlaying) {
-                MusicVisualizerBars()
+                MusicVisualizerBars(accentColor = paletteColors.vibrantAccent)
             } else if (notification != null) {
                 Text(
                     text = notification.appName.take(8),
@@ -172,7 +174,7 @@ fun CompactPillContent(
 }
 
 @Composable
-fun MusicVisualizerBars() {
+fun MusicVisualizerBars(accentColor: Color = Color(0xFFA29BFE)) {
     val infiniteTransition = rememberInfiniteTransition(label = "visualizer")
 
     val height1 by infiniteTransition.animateFloat(
@@ -209,19 +211,19 @@ fun MusicVisualizerBars() {
             modifier = Modifier
                 .width(3.dp)
                 .height(height1.dp)
-                .background(Color(0xFF00CEC9), CircleShape)
+                .background(accentColor, CircleShape)
         )
         Box(
             modifier = Modifier
                 .width(3.dp)
                 .height(height2.dp)
-                .background(Color(0xFFA29BFE), CircleShape)
+                .background(accentColor.copy(alpha = 0.8f), CircleShape)
         )
         Box(
             modifier = Modifier
                 .width(3.dp)
                 .height(height3.dp)
-                .background(Color(0xFFFD79A8), CircleShape)
+                .background(accentColor.copy(alpha = 0.6f), CircleShape)
         )
     }
 }

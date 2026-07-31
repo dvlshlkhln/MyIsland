@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.myisland.dynamic.data.*
 import com.myisland.dynamic.ui.theme.VibrantGreen
+import com.myisland.dynamic.utils.IslandPaletteColors
 
 @Composable
 fun ExpandedCardContent(
@@ -30,6 +31,7 @@ fun ExpandedCardContent(
     callState: CallState = CallState(),
     timerState: TimerState = TimerState(),
     bluetoothState: BluetoothDeviceState = BluetoothDeviceState(),
+    paletteColors: IslandPaletteColors = IslandPaletteColors(),
     onPlayPauseToggle: () -> Unit,
     onSkipNext: () -> Unit,
     onSkipPrevious: () -> Unit,
@@ -60,6 +62,7 @@ fun ExpandedCardContent(
         } else if (mediaState.isPlaying || mediaState.title.isNotBlank()) {
             ExpandedMediaView(
                 mediaState = mediaState,
+                paletteColors = paletteColors,
                 onPlayPauseToggle = onPlayPauseToggle,
                 onSkipNext = onSkipNext,
                 onSkipPrevious = onSkipPrevious
@@ -257,6 +260,7 @@ fun ExpandedBluetoothView(bluetoothState: BluetoothDeviceState) {
 @Composable
 fun ExpandedMediaView(
     mediaState: MediaState,
+    paletteColors: IslandPaletteColors = IslandPaletteColors(),
     onPlayPauseToggle: () -> Unit,
     onSkipNext: () -> Unit,
     onSkipPrevious: () -> Unit
@@ -282,13 +286,13 @@ fun ExpandedMediaView(
                     modifier = Modifier
                         .size(54.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFF2D2B55)),
+                        .background(paletteColors.mutedBackground),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.MusicNote,
                         contentDescription = "Music",
-                        tint = Color.White,
+                        tint = paletteColors.vibrantAccent,
                         modifier = Modifier.size(28.dp)
                     )
                 }
@@ -326,7 +330,7 @@ fun ExpandedMediaView(
                 .fillMaxWidth()
                 .height(4.dp)
                 .clip(RoundedCornerShape(2.dp)),
-            color = Color(0xFFA29BFE),
+            color = paletteColors.vibrantAccent,
             trackColor = Color.White.copy(alpha = 0.2f)
         )
 
@@ -349,7 +353,7 @@ fun ExpandedMediaView(
                 modifier = Modifier
                     .size(44.dp)
                     .clip(CircleShape)
-                    .background(Color.White)
+                    .background(paletteColors.vibrantAccent)
                     .clickable { onPlayPauseToggle() },
                 contentAlignment = Alignment.Center
             ) {

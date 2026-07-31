@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.myisland.dynamic.data.*
 import com.myisland.dynamic.ui.theme.PureBlack
 import com.myisland.dynamic.utils.HapticManager
+import com.myisland.dynamic.utils.PaletteThemeExtractor
 
 @Composable
 fun DynamicIslandView(
@@ -39,6 +40,11 @@ fun DynamicIslandView(
 ) {
     val context = LocalContext.current
     val hapticManager = remember { HapticManager(context) }
+
+    // Dynamic Palette Extractor
+    val paletteColors = remember(mediaState.albumArt, notification?.icon) {
+        PaletteThemeExtractor.extractColors(mediaState.albumArt ?: notification?.icon)
+    }
 
     val targetWidth = when (mode) {
         IslandMode.HIDDEN -> 0.dp
@@ -66,7 +72,7 @@ fun DynamicIslandView(
                     .offset(x = config.xOffsetDp.dp)
                     .width(targetWidth)
                     .height(targetHeight)
-                    .shadow(elevation = 16.dp, shape = RoundedCornerShape(config.cornerRadiusDp.dp))
+                    .shadow(elevation = 16.dp, shape = RoundedCornerShape(config.cornerRadiusDp.dp), spotColor = paletteColors.vibrantAccent)
                     .clip(RoundedCornerShape(config.cornerRadiusDp.dp))
                     .background(PureBlack)
                     .animateContentSize(
@@ -88,7 +94,8 @@ fun DynamicIslandView(
                             chargingState = chargingState,
                             callState = callState,
                             timerState = timerState,
-                            bluetoothState = bluetoothState
+                            bluetoothState = bluetoothState,
+                            paletteColors = paletteColors
                         )
                     }
                     IslandMode.EXPANDED -> {
@@ -99,6 +106,7 @@ fun DynamicIslandView(
                             callState = callState,
                             timerState = timerState,
                             bluetoothState = bluetoothState,
+                            paletteColors = paletteColors,
                             onPlayPauseToggle = {
                                 hapticManager.performClickHaptic()
                                 onPlayPauseToggle()
