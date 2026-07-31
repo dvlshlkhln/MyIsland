@@ -9,7 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,9 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.myisland.dynamic.data.ChargingState
-import com.myisland.dynamic.data.MediaState
-import com.myisland.dynamic.data.NotificationItem
+import com.myisland.dynamic.data.*
 import com.myisland.dynamic.ui.theme.VibrantGreen
 
 @Composable
@@ -29,17 +27,37 @@ fun ExpandedCardContent(
     mediaState: MediaState,
     notification: NotificationItem?,
     chargingState: ChargingState,
+    callState: CallState = CallState(),
+    timerState: TimerState = TimerState(),
+    bluetoothState: BluetoothDeviceState = BluetoothDeviceState(),
     onPlayPauseToggle: () -> Unit,
     onSkipNext: () -> Unit,
     onSkipPrevious: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onEndCall: () -> Unit = {},
+    onToggleMuteCall: () -> Unit = {},
+    onAddTimerMinute: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        if (mediaState.isPlaying || mediaState.title.isNotBlank()) {
+        if (callState.isRinging || callState.isActiveCall) {
+            ExpandedCallView(
+                callState = callState,
+                onEndCall = onEndCall,
+                onToggleMute = onToggleMuteCall
+            )
+        } else if (timerState.isRunning) {
+            ExpandedTimerView(
+                timerState = timerState,
+                onAddMinute = onAddTimerMinute,
+                onDismiss = onDismiss
+            )
+        } else if (bluetoothState.isConnected) {
+            ExpandedBluetoothView(bluetoothState = bluetoothState)
+        } else if (mediaState.isPlaying || mediaState.title.isNotBlank()) {
             ExpandedMediaView(
                 mediaState = mediaState,
                 onPlayPauseToggle = onPlayPauseToggle,
@@ -55,6 +73,183 @@ fun ExpandedCardContent(
             ExpandedChargingView(chargingState = chargingState)
         } else {
             ExpandedDefaultView()
+        }
+    }
+}
+
+@Composable
+fun ExpandedCallView(
+    callState: CallState,
+    onEndCall: () -> Unit,
+    onToggleMute: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxSize(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .size(52.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFF2D3436)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = "Contact Avatar",
+                    tint = Color.White,
+                    modifier = Modifier.size(30.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column {
+                Text(
+                    text = callState.callerName.ifBlank { "Mobile Call" },
+                    color = Color.White,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                val mins = callState.callDurationSeconds / 60
+                val secs = callState.callDurationSeconds % 60
+                Text(
+                    text = if (callState.isRinging) "Incoming Call..." else String.format("%02d:%02d", mins, secs),
+                    color = if (callState.isRinging) Color(0xFFFF7675) else VibrantGreen,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            IconButton(
+                onClick = onToggleMute,
+                modifier = Modifier
+                    .size(42.dp)
+                    .clip(CircleShape)
+                    .background(if (callState.isMuted) Color(0xFFE17055) else Color(0xFF636E72))
+            ) {
+                Icon(
+                    imageVector = if (callState.isMuted) Icons.Default.MicOff else Icons.Default.Mic,
+                    contentDescription = "Mute",
+                    tint = Color.White,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+
+            IconButton(
+                onClick = onEndCall,
+                modifier = Modifier
+                    .size(42.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFFD63031))
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CallEnd,
+                    contentDescription = "End Call",
+                    tint = Color.White,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ExpandedTimerView(
+    timerState: TimerState,
+    onAddMinute: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxSize(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .size(50.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFFFDCB6E).copy(alpha = 0.2f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Timer,
+                    contentDescription = "Timer",
+                    tint = Color(0xFFFDCB6E),
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column {
+                Text(
+                    text = timerState.title,
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                val mins = timerState.remainingSeconds / 60
+                val secs = timerState.remainingSeconds % 60
+                Text(
+                    text = String.format("%02d:%02d", mins, secs),
+                    color = Color(0xFFFDCB6E),
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(
+                onClick = onAddMinute,
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0984E3)),
+                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(text = "+1 min", fontSize = 12.sp, color = Color.White)
+            }
+
+            IconButton(onClick = onDismiss, modifier = Modifier.size(32.dp)) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Dismiss",
+                    tint = Color.White.copy(alpha = 0.7f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ExpandedBluetoothView(bluetoothState: BluetoothDeviceState) {
+    Row(
+        modifier = Modifier.fillMaxSize(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.Headphones,
+            contentDescription = "Bluetooth Connected",
+            tint = Color(0xFF74B9FF),
+            modifier = Modifier.size(40.dp)
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Column {
+            Text(
+                text = "Connected Accessory",
+                color = Color.White.copy(alpha = 0.6f),
+                fontSize = 12.sp
+            )
+            Text(
+                text = bluetoothState.deviceName,
+                color = Color.White,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }
@@ -250,7 +445,7 @@ fun ExpandedNotificationView(
                 text = notification.message,
                 color = Color.White.copy(alpha = 0.9f),
                 fontSize = 12.sp,
-                maxLines = 3,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
         }
@@ -295,7 +490,7 @@ fun ExpandedDefaultView() {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "MyIsland • Motorola Edge 60 Pro",
+            text = "MyIsland • Active Multi-Session",
             color = Color.White.copy(alpha = 0.7f),
             fontSize = 13.sp,
             fontWeight = FontWeight.Medium

@@ -5,7 +5,6 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectSwipeGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
@@ -13,7 +12,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.myisland.dynamic.data.*
@@ -27,11 +25,17 @@ fun DynamicIslandView(
     mediaState: MediaState,
     notification: NotificationItem?,
     chargingState: ChargingState,
+    callState: CallState = CallState(),
+    timerState: TimerState = TimerState(),
+    bluetoothState: BluetoothDeviceState = BluetoothDeviceState(),
     onToggleExpand: () -> Unit,
     onPlayPauseToggle: () -> Unit,
     onSkipNext: () -> Unit,
     onSkipPrevious: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onEndCall: () -> Unit = {},
+    onToggleMuteCall: () -> Unit = {},
+    onAddTimerMinute: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val hapticManager = remember { HapticManager(context) }
@@ -81,7 +85,10 @@ fun DynamicIslandView(
                         CompactPillContent(
                             mediaState = mediaState,
                             notification = notification,
-                            chargingState = chargingState
+                            chargingState = chargingState,
+                            callState = callState,
+                            timerState = timerState,
+                            bluetoothState = bluetoothState
                         )
                     }
                     IslandMode.EXPANDED -> {
@@ -89,6 +96,9 @@ fun DynamicIslandView(
                             mediaState = mediaState,
                             notification = notification,
                             chargingState = chargingState,
+                            callState = callState,
+                            timerState = timerState,
+                            bluetoothState = bluetoothState,
                             onPlayPauseToggle = {
                                 hapticManager.performClickHaptic()
                                 onPlayPauseToggle()
@@ -104,6 +114,18 @@ fun DynamicIslandView(
                             onDismiss = {
                                 hapticManager.performHeavyHaptic()
                                 onDismiss()
+                            },
+                            onEndCall = {
+                                hapticManager.performHeavyHaptic()
+                                onEndCall()
+                            },
+                            onToggleMuteCall = {
+                                hapticManager.performClickHaptic()
+                                onToggleMuteCall()
+                            },
+                            onAddTimerMinute = {
+                                hapticManager.performClickHaptic()
+                                onAddTimerMinute()
                             }
                         )
                     }

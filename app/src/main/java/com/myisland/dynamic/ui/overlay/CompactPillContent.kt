@@ -7,9 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,9 +20,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.myisland.dynamic.data.ChargingState
-import com.myisland.dynamic.data.MediaState
-import com.myisland.dynamic.data.NotificationItem
+import com.myisland.dynamic.data.*
 import com.myisland.dynamic.ui.theme.VibrantGreen
 
 @Composable
@@ -32,6 +28,9 @@ fun CompactPillContent(
     mediaState: MediaState,
     notification: NotificationItem?,
     chargingState: ChargingState,
+    callState: CallState = CallState(),
+    timerState: TimerState = TimerState(),
+    bluetoothState: BluetoothDeviceState = BluetoothDeviceState(),
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -47,7 +46,28 @@ fun CompactPillContent(
             horizontalArrangement = Arrangement.Start,
             modifier = Modifier.weight(1f)
         ) {
-            if (mediaState.albumArt != null) {
+            if (callState.isRinging || callState.isActiveCall) {
+                Icon(
+                    imageVector = Icons.Default.Call,
+                    contentDescription = "Call",
+                    tint = if (callState.isRinging) Color(0xFFFF7675) else VibrantGreen,
+                    modifier = Modifier.size(20.dp)
+                )
+            } else if (timerState.isRunning) {
+                Icon(
+                    imageVector = Icons.Default.Timer,
+                    contentDescription = "Timer",
+                    tint = Color(0xFFFDCB6E),
+                    modifier = Modifier.size(20.dp)
+                )
+            } else if (bluetoothState.isConnected) {
+                Icon(
+                    imageVector = Icons.Default.Headphones,
+                    contentDescription = "Bluetooth",
+                    tint = Color(0xFF74B9FF),
+                    modifier = Modifier.size(20.dp)
+                )
+            } else if (mediaState.albumArt != null) {
                 Image(
                     bitmap = mediaState.albumArt.asImageBitmap(),
                     contentDescription = "Album Art",
@@ -98,7 +118,39 @@ fun CompactPillContent(
             horizontalArrangement = Arrangement.End,
             modifier = Modifier.weight(1f)
         ) {
-            if (mediaState.isPlaying) {
+            if (callState.isActiveCall) {
+                val mins = callState.callDurationSeconds / 60
+                val secs = callState.callDurationSeconds % 60
+                Text(
+                    text = String.format("%02d:%02d", mins, secs),
+                    color = VibrantGreen,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            } else if (callState.isRinging) {
+                Text(
+                    text = "Incoming",
+                    color = Color(0xFFFF7675),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            } else if (timerState.isRunning) {
+                val mins = timerState.remainingSeconds / 60
+                val secs = timerState.remainingSeconds % 60
+                Text(
+                    text = String.format("%02d:%02d", mins, secs),
+                    color = Color(0xFFFDCB6E),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            } else if (bluetoothState.isConnected) {
+                Text(
+                    text = bluetoothState.deviceName.take(7),
+                    color = Color(0xFF74B9FF),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            } else if (mediaState.isPlaying) {
                 MusicVisualizerBars()
             } else if (notification != null) {
                 Text(
@@ -122,7 +174,7 @@ fun CompactPillContent(
 @Composable
 fun MusicVisualizerBars() {
     val infiniteTransition = rememberInfiniteTransition(label = "visualizer")
-    
+
     val height1 by infiniteTransition.animateFloat(
         initialValue = 6f,
         targetValue = 18f,

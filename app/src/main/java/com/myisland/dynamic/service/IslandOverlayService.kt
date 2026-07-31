@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
 import android.os.Build
-import android.os.IBinder
 import android.view.Gravity
 import android.view.WindowManager
 import androidx.compose.runtime.collectAsState
@@ -30,6 +29,9 @@ class IslandOverlayService : LifecycleService() {
     private lateinit var windowManager: WindowManager
     private lateinit var overlayView: ComposeView
     private lateinit var prefsManager: PreferencesManager
+
+    private lateinit var callSessionManager: CallSessionManager
+    private lateinit var timerSessionManager: TimerSessionManager
 
     private var currentMode by mutableStateOf(IslandMode.COMPACT)
     private var islandConfig by mutableStateOf(IslandConfig())
@@ -57,6 +59,11 @@ class IslandOverlayService : LifecycleService() {
         super.onCreate()
         prefsManager = PreferencesManager(this)
         islandConfig = prefsManager.getConfig()
+
+        callSessionManager = CallSessionManager(this)
+        CallStateReceiver.callSessionManager = callSessionManager
+
+        timerSessionManager = TimerSessionManager()
 
         createNotificationChannel()
         startForeground(NOTIFICATION_ID, buildForegroundNotification())
@@ -91,12 +98,19 @@ class IslandOverlayService : LifecycleService() {
                     val notification by IslandNotificationListenerService.latestNotification.collectAsState()
                     val chargingState by SystemEventReceiver.chargingState.collectAsState()
 
+                    val callState by callSessionManager.callState.collectAsState()
+                    val timerState by timerSessionManager.timerState.collectAsState()
+                    val bluetoothState by BluetoothEventReceiver.bluetoothState.collectAsState()
+
                     DynamicIslandView(
                         mode = currentMode,
                         config = islandConfig,
                         mediaState = mediaState,
                         notification = notification,
                         chargingState = chargingState,
+                        callState = callState,
+                        timerState = timerState,
+                        bluetoothState = bluetoothState,
                         onToggleExpand = {
                             currentMode = if (currentMode == IslandMode.EXPANDED) IslandMode.COMPACT else IslandMode.EXPANDED
                         },
@@ -111,6 +125,15 @@ class IslandOverlayService : LifecycleService() {
                         },
                         onDismiss = {
                             currentMode = IslandMode.COMPACT
+                        },
+                        onEndCall = {
+                            callSessionManager.endCall()
+                        },
+                        onToggleMuteCall = {
+                            callSessionManager.toggleMute()
+                        },
+                        onAddTimerMinute = {
+                            timerSessionManager.addOneMinute()
                         }
                     )
                 }
@@ -151,7 +174,7 @@ class IslandOverlayService : LifecycleService() {
 
     private fun buildForegroundNotification() = NotificationCompat.Builder(this, CHANNEL_ID)
         .setContentTitle("MyIsland is Running")
-        .setContentText("Dynamic Island active on Motorola Edge 60 Pro")
+        .setContentText("Dynamic Island active on your phone")
         .setSmallIcon(android.R.drawable.ic_menu_compass)
         .setPriority(NotificationCompat.PRIORITY_LOW)
         .setOngoing(true)

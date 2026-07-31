@@ -12,8 +12,11 @@ enum class IslandMode {
 enum class IslandContentType {
     NONE,
     MEDIA_PLAYER,
+    CALL,
+    TIMER,
     NOTIFICATION,
     CHARGING,
+    BLUETOOTH_BANNER,
     RINGER_MODE
 }
 
@@ -25,6 +28,29 @@ data class MediaState(
     val durationMs: Long = 0L,
     val positionMs: Long = 0L,
     val packageName: String = ""
+)
+
+data class CallState(
+    val callerName: String = "",
+    val callerNumber: String = "",
+    val avatar: Bitmap? = null,
+    val isRinging: Boolean = false,
+    val isActiveCall: Boolean = false,
+    val callDurationSeconds: Int = 0,
+    val isMuted: Boolean = false
+)
+
+data class TimerState(
+    val title: String = "Timer",
+    val remainingSeconds: Int = 0,
+    val totalSeconds: Int = 0,
+    val isRunning: Boolean = false
+)
+
+data class BluetoothDeviceState(
+    val deviceName: String = "",
+    val isConnected: Boolean = false,
+    val batteryLevel: Int = -1 // -1 if unknown
 )
 
 data class NotificationItem(
@@ -44,12 +70,12 @@ data class ChargingState(
 )
 
 data class RingerState(
-    val modeName: String = "Normal", // Silent, Vibrate, Normal
+    val modeName: String = "Normal",
     val iconResId: Int = 0
 )
 
 data class IslandConfig(
-    val yOffsetDp: Int = 12,           // Motorola Edge 60 Pro Top Punch Hole Offset
+    val yOffsetDp: Int = 12,           // Motorola Edge 60 Pro Default
     val xOffsetDp: Int = 0,            // Center Aligned
     val compactWidthDp: Int = 190,
     val compactHeightDp: Int = 38,
@@ -59,5 +85,8 @@ data class IslandConfig(
     val isMusicEnabled: Boolean = true,
     val isChargingEnabled: Boolean = true,
     val isNotificationsEnabled: Boolean = true,
+    val isCallsEnabled: Boolean = true,
+    val isTimersEnabled: Boolean = true,
+    val isBluetoothEnabled: Boolean = true,
     val autoCollapseSeconds: Int = 4
 )
