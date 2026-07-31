@@ -36,6 +36,7 @@ fun CompactPillContent(
     bluetoothState: BluetoothDeviceState = BluetoothDeviceState(),
     volumeRingerState: VolumeRingerState = VolumeRingerState(),
     navigationState: NavigationState = NavigationState(),
+    visualizerStyle: VisualizerStyle = VisualizerStyle.FOUR_BARS,
     paletteColors: IslandPaletteColors = IslandPaletteColors(),
     modifier: Modifier = Modifier
 ) {
@@ -193,7 +194,11 @@ fun CompactPillContent(
                     fontWeight = FontWeight.SemiBold
                 )
             } else if (mediaState.isPlaying) {
-                MusicVisualizerBars(accentColor = paletteColors.vibrantAccent)
+                when (visualizerStyle) {
+                    VisualizerStyle.FOUR_BARS -> MusicVisualizerBars(accentColor = paletteColors.vibrantAccent)
+                    VisualizerStyle.WAVEFORM -> WaveformVisualizer(accentColor = paletteColors.vibrantAccent)
+                    VisualizerStyle.PULSE_RING -> PulseRingVisualizer(accentColor = paletteColors.vibrantAccent)
+                }
             } else if (notification != null) {
                 Text(
                     text = notification.appName.take(8),
@@ -278,6 +283,57 @@ fun MusicVisualizerBars(accentColor: Color = Color(0xFFA29BFE)) {
                 .width(2.5.dp)
                 .height(height4.dp)
                 .background(accentColor.copy(alpha = 0.6f), CircleShape)
+        )
+    }
+}
+
+@Composable
+fun WaveformVisualizer(accentColor: Color = Color(0xFFA29BFE)) {
+    val infiniteTransition = rememberInfiniteTransition(label = "waveform")
+    val scale by infiniteTransition.animateFloat(
+        initialValue = 0.7f,
+        targetValue = 1.3f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(500, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ), label = "scale"
+    )
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Default.GraphicEq,
+            contentDescription = "Waveform",
+            tint = accentColor,
+            modifier = Modifier.size((18 * scale).dp)
+        )
+    }
+}
+
+@Composable
+fun PulseRingVisualizer(accentColor: Color = Color(0xFFA29BFE)) {
+    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+    val alpha by infiniteTransition.animateFloat(
+        initialValue = 0.3f,
+        targetValue = 1.0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(600, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ), label = "alpha"
+    )
+    Box(
+        modifier = Modifier
+            .size(16.dp)
+            .clip(CircleShape)
+            .background(accentColor.copy(alpha = alpha)),
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .size(8.dp)
+                .clip(CircleShape)
+                .background(Color.White)
         )
     }
 }

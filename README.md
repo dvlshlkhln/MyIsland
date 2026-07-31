@@ -16,6 +16,7 @@ Every commit pushed or merged into the `main` branch automatically triggers GitH
 
 ## ✨ Features
 
+- 🎨 **Island Aesthetic Themes & Visualizer Styles**: 4 dynamic aesthetic themes (Midnight OLED, Cyberpunk Neon, Sunset Gold, Glassmorphism) and 3 audio spectrum styles (4-Bar Equalizer, Waveform, Pulsating Ring).
 - 📱 **Interactive Drag Calibration & App Whitelist Manager**: Touch-drag positioning calibration directly around your camera cutout with live DP coordinates, plus a granular app notification whitelist/blacklist manager in Settings.
 - 🗺️ **Live Google Maps & Waze Turn-by-Turn Navigation**: Intercepts navigation directions, rendering real-time direction arrows (Turn Left, Turn Right, U-Turn), distance countdown (`150m`), and upcoming street names directly in the island pill.
 - ✨ **Ambient Accent Aura Glow**: Glassmorphic glowing shadow aura around the island container dynamically tinted by album artwork or app branding color.

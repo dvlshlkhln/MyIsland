@@ -16,6 +16,8 @@ class PreferencesManager(context: Context) {
         private const val KEY_EXPANDED_WIDTH = "expanded_width"
         private const val KEY_EXPANDED_HEIGHT = "expanded_height"
         private const val KEY_CORNER_RADIUS = "corner_radius"
+        private const val KEY_THEME_STYLE = "theme_style"
+        private const val KEY_VISUALIZER_STYLE = "visualizer_style"
         private const val KEY_MUSIC_ENABLED = "music_enabled"
         private const val KEY_CHARGING_ENABLED = "charging_enabled"
         private const val KEY_NOTIFS_ENABLED = "notifs_enabled"
@@ -25,6 +27,9 @@ class PreferencesManager(context: Context) {
     }
 
     fun getConfig(): IslandConfig {
+        val themeOrdinal = prefs.getInt(KEY_THEME_STYLE, IslandThemeStyle.MIDNIGHT_OLED.ordinal)
+        val visOrdinal = prefs.getInt(KEY_VISUALIZER_STYLE, VisualizerStyle.FOUR_BARS.ordinal)
+
         return IslandConfig(
             yOffsetDp = prefs.getInt(KEY_Y_OFFSET, 34),
             xOffsetDp = prefs.getInt(KEY_X_OFFSET, 0),
@@ -33,6 +38,8 @@ class PreferencesManager(context: Context) {
             expandedWidthDp = prefs.getInt(KEY_EXPANDED_WIDTH, 350),
             expandedHeightDp = prefs.getInt(KEY_EXPANDED_HEIGHT, 170),
             cornerRadiusDp = prefs.getInt(KEY_CORNER_RADIUS, 24),
+            themeStyle = IslandThemeStyle.values().getOrElse(themeOrdinal) { IslandThemeStyle.MIDNIGHT_OLED },
+            visualizerStyle = VisualizerStyle.values().getOrElse(visOrdinal) { VisualizerStyle.FOUR_BARS },
             isMusicEnabled = prefs.getBoolean(KEY_MUSIC_ENABLED, true),
             isChargingEnabled = prefs.getBoolean(KEY_CHARGING_ENABLED, true),
             isNotificationsEnabled = prefs.getBoolean(KEY_NOTIFS_ENABLED, true),
@@ -49,6 +56,8 @@ class PreferencesManager(context: Context) {
             putInt(KEY_EXPANDED_WIDTH, config.expandedWidthDp)
             putInt(KEY_EXPANDED_HEIGHT, config.expandedHeightDp)
             putInt(KEY_CORNER_RADIUS, config.cornerRadiusDp)
+            putInt(KEY_THEME_STYLE, config.themeStyle.ordinal)
+            putInt(KEY_VISUALIZER_STYLE, config.visualizerStyle.ordinal)
             putBoolean(KEY_MUSIC_ENABLED, config.isMusicEnabled)
             putBoolean(KEY_CHARGING_ENABLED, config.isChargingEnabled)
             putBoolean(KEY_NOTIFS_ENABLED, config.isNotificationsEnabled)

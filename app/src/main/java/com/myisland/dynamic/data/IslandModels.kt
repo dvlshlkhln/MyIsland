@@ -16,6 +16,19 @@ enum class CutoutShape {
     CORNER_NOTCH
 }
 
+enum class IslandThemeStyle {
+    MIDNIGHT_OLED,
+    CYBERPUNK_NEON,
+    SUNSET_GOLD,
+    GLASSMORPHISM
+}
+
+enum class VisualizerStyle {
+    FOUR_BARS,
+    WAVEFORM,
+    PULSE_RING
+}
+
 enum class NavigationDirection {
     STRAIGHT,
     TURN_LEFT,
@@ -80,7 +93,8 @@ data class NotificationItem(
 data class ChargingState(
     val isCharging: Boolean = false,
     val batteryLevel: Int = 100,
-    val isFastCharging: Boolean = false
+    val isFastCharging: Boolean = false,
+    val chargingWattText: String = "68W TurboPower"
 )
 
 data class RingerState(
@@ -89,14 +103,16 @@ data class RingerState(
 )
 
 data class IslandConfig(
-    val yOffsetDp: Int = 12,           // Motorola Edge 60 Pro Default
+    val yOffsetDp: Int = 34,           // Motorola Edge 60 Pro Default
     val xOffsetDp: Int = 0,            // Center Aligned
-    val compactWidthDp: Int = 190,
-    val compactHeightDp: Int = 38,
+    val compactWidthDp: Int = 200,
+    val compactHeightDp: Int = 40,
     val expandedWidthDp: Int = 350,
     val expandedHeightDp: Int = 170,
     val cornerRadiusDp: Int = 24,
     val cutoutShape: CutoutShape = CutoutShape.SINGLE_HOLE,
+    val themeStyle: IslandThemeStyle = IslandThemeStyle.MIDNIGHT_OLED,
+    val visualizerStyle: VisualizerStyle = VisualizerStyle.FOUR_BARS,
     val showOnLockscreen: Boolean = true,
     val isMusicEnabled: Boolean = true,
     val isChargingEnabled: Boolean = true,

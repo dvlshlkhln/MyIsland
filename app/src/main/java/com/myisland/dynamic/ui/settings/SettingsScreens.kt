@@ -24,10 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
-import com.myisland.dynamic.data.DevicePreset
-import com.myisland.dynamic.data.DevicePresets
-import com.myisland.dynamic.data.IslandConfig
-import com.myisland.dynamic.data.PreferencesManager
+import com.myisland.dynamic.data.*
 import com.myisland.dynamic.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -112,6 +109,86 @@ fun SettingsDashboardScreen(
                             checkedTrackColor = IslandAccentPrimary
                         )
                     )
+                }
+            }
+
+            // Custom Themes & Visualizers
+            Text(
+                text = "Aesthetic Themes & Spectrum",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = TextSecondary
+            )
+
+            Card(
+                colors = CardDefaults.cardColors(containerColor = DarkSurface),
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Island Color Theme",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        IslandThemeStyle.values().forEach { style ->
+                            FilterChip(
+                                selected = config.themeStyle == style,
+                                onClick = { onConfigChange(config.copy(themeStyle = style)) },
+                                label = {
+                                    Text(
+                                        text = style.name.replace("_", " ").take(9),
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = IslandAccentPrimary,
+                                    selectedLabelColor = Color.White
+                                )
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Text(
+                        text = "Music Spectrum Style",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        VisualizerStyle.values().forEach { visStyle ->
+                            FilterChip(
+                                selected = config.visualizerStyle == visStyle,
+                                onClick = { onConfigChange(config.copy(visualizerStyle = visStyle)) },
+                                label = {
+                                    Text(
+                                        text = visStyle.name.replace("_", " "),
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = IslandAccentSecondary,
+                                    selectedLabelColor = Color.White
+                                )
+                            )
+                        }
+                    }
                 }
             }
 

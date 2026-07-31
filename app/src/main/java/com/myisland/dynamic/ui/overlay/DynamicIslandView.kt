@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.pointerInput
@@ -101,6 +102,17 @@ fun DynamicIslandView(
 
     val alphaFraction = ((1f - (kotlin.math.abs(animatedDragX) / 250f))).coerceIn(0f, 1f)
 
+    val themeBackgroundModifier = when (config.themeStyle) {
+        IslandThemeStyle.MIDNIGHT_OLED -> Modifier.background(PureBlack)
+        IslandThemeStyle.CYBERPUNK_NEON -> Modifier.background(
+            Brush.linearGradient(listOf(Color(0xFF0F0C20), Color(0xFF2D114C)))
+        )
+        IslandThemeStyle.SUNSET_GOLD -> Modifier.background(
+            Brush.linearGradient(listOf(Color(0xFF1F1000), Color(0xFF381C00)))
+        )
+        IslandThemeStyle.GLASSMORPHISM -> Modifier.background(Color(0xCC111118))
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -122,7 +134,7 @@ fun DynamicIslandView(
                         ambientColor = if (isCalibrationMode) Color(0xFFFF7675) else if (navigationState.isNavigating) Color(0xFF00CEC9) else paletteColors.vibrantAccent
                     )
                     .clip(RoundedCornerShape(config.cornerRadiusDp.dp))
-                    .background(PureBlack)
+                    .then(themeBackgroundModifier)
                     .animateContentSize(
                         animationSpec = spring(
                             dampingRatio = Spring.DampingRatioMediumBouncy,
@@ -198,6 +210,7 @@ fun DynamicIslandView(
                                 bluetoothState = bluetoothState,
                                 volumeRingerState = volumeRingerState,
                                 navigationState = navigationState,
+                                visualizerStyle = config.visualizerStyle,
                                 paletteColors = paletteColors
                             )
                         }

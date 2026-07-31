@@ -1,34 +1,40 @@
-# Phase 6: Next-Gen Features & Visual Masterpiece
+# Phase 7: Aesthetic Masterpiece & Customization Plan
 
-A plan to introduce live turn-by-turn navigation, interactive drag alignment calibration, ambient album artwork glow aura, and granular app notification filtering.
+A plan to add custom island aesthetic themes, multiple audio visualizer spectrum styles, fast charging watt meter alerts, and double-tap quick shortcuts.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> Please review the proposed Phase 6 features below!
+> Please review the proposed Phase 7 enhancements below!
 
 ---
 
-## 🚀 Proposed Phase 6 Features
+## 🎨 Proposed Phase 7 Enhancements
 
-### 1. Live Maps Turn-by-Turn Navigation Banner
-- **Overview**: Intercept Google Maps & Waze navigation notifications.
-- **UI Experience**: Displays real-time direction arrow icons (Turn Left, Turn Right, U-Turn), distance countdown (`150m`), and upcoming street names directly in the island pill.
+### 1. Custom Island Aesthetic Themes
+- **Preset Themes**:
+  - 🖤 **Midnight OLED** (Pure Pitch Black)
+  - 🟣 **Cyberpunk Neon** (Vibrant Purple & Cyan Glow)
+  - 🌅 **Sunset Gold** (Warm Gold Accent)
+  - 🧊 **Glassmorphism Blur** (Translucent Frosted Glass)
 
-### 2. Glassmorphic Ambient Accent Glow Aura
-- **Overview**: Use extracted `Palette` accent color to render a subtle, pulsating 3D glowing shadow aura around the island container matching active music album art or app branding.
+### 2. Audio Visualizer Spectrum Styles
+- **Visualizer Options**:
+  - 📊 4-Bar Equalizer
+  - 🌊 Sine Wave Form
+  - ⭕ Pulsating Glowing Ring
 
-### 3. Interactive On-Screen Drag Alignment Calibration
-- **Overview**: Enable a drag-to-position calibration mode where users can drag the floating island pill directly around their camera hole with their finger to lock in exact X & Y offsets.
+### 3. Charging Watt Meter Alert
+- Displays real-time charging watt metrics (e.g. `68W TurboPower`, `25W Fast Charge`) with a green fill ring animation upon plugging in USB-C.
 
-### 4. Granular App Notification Whitelist / Blacklist
-- **Overview**: Allow users to toggle notification popups on/off per app (e.g., WhatsApp: ON, Instagram: ON, System: OFF).
+### 4. Double-Tap Custom Shortcut
+- Double-tapping the island triggers a user-selected shortcut (e.g., Open Spotify, Take Screenshot, Toggle Flashlight).
 
 ---
 
 ## Verification Plan
 
 ### Manual Verification
-1. Start Google Maps navigation -> verify turn direction arrow in island.
-2. Drag island on screen in calibration mode -> verify real-time position save.
-3. Observe ambient colored glow around music playback.
+1. Select theme in Settings -> verify island appearance change.
+2. Plug in charger -> verify charging watt alert.
+3. Double-tap island -> verify custom shortcut trigger.
