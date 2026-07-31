@@ -4,21 +4,31 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.myisland.dynamic.data.*
 import com.myisland.dynamic.service.VolumeRingerState
 import com.myisland.dynamic.ui.theme.PureBlack
@@ -55,6 +65,9 @@ fun DynamicIslandView(
 
     var showQuickActionMenu by remember { mutableStateOf(false) }
 
+    // Check if two sessions are running simultaneously for Dual-Pill Split Mode
+    val isDualSession = (mediaState.isPlaying || mediaState.albumArt != null) && timerState.isRunning && mode == IslandMode.COMPACT
+
     // Dynamic Palette Extractor
     val paletteColors = remember(mediaState.albumArt, notification?.icon) {
         PaletteThemeExtractor.extractColors(mediaState.albumArt ?: notification?.icon)
@@ -64,13 +77,13 @@ fun DynamicIslandView(
     var dragXOffset by remember { mutableFloatStateOf(0f) }
     val animatedDragX by animateFloatAsState(
         targetValue = dragXOffset,
-        animationSpec = spring(stiffness = Spring.StiffnessMedium, dampingRatio = Spring.DampingRatioLowBouncy),
+        animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioMediumBouncy),
         label = "dragX"
     )
 
     val targetWidth = when (mode) {
         IslandMode.HIDDEN -> 0.dp
-        IslandMode.COMPACT -> config.compactWidthDp.dp
+        IslandMode.COMPACT -> if (isDualSession) (config.compactWidthDp - 40).dp else config.compactWidthDp.dp
         IslandMode.EXPANDED -> config.expandedWidthDp.dp
         IslandMode.TOAST -> (config.expandedWidthDp - 20).dp
     }
@@ -84,13 +97,15 @@ fun DynamicIslandView(
 
     val alphaFraction = ((1f - (kotlin.math.abs(animatedDragX) / 250f))).coerceIn(0f, 1f)
 
-    Box(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight(),
-        contentAlignment = Alignment.TopCenter
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         if (mode != IslandMode.HIDDEN) {
+            // Main Island Pill
             Box(
                 modifier = Modifier
                     .offset(x = (config.xOffsetDp + (animatedDragX / density)).dp)
@@ -102,8 +117,8 @@ fun DynamicIslandView(
                     .background(PureBlack)
                     .animateContentSize(
                         animationSpec = spring(
-                            dampingRatio = Spring.DampingRatioLowBouncy,
-                            stiffness = Spring.StiffnessLow
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessMediumLow
                         )
                     )
                     .pointerInput(Unit) {
@@ -201,6 +216,37 @@ fun DynamicIslandView(
                         ExpandedChargingView(chargingState = chargingState)
                     }
                     else -> {}
+                }
+            }
+
+            // Secondary Detached Sub-Pill (iOS Dual-Pill Architecture)
+            if (isDualSession) {
+                Spacer(modifier = Modifier.width(10.dp))
+
+                Box(
+                    modifier = Modifier
+                        .size(38.dp)
+                        .shadow(elevation = 12.dp, shape = CircleShape, spotColor = Color(0xFFFDCB6E))
+                        .clip(CircleShape)
+                        .background(PureBlack)
+                        .pointerInput(Unit) {
+                            detectTapGestures(
+                                onTap = {
+                                    hapticManager.performClickHaptic()
+                                    onToggleExpand()
+                                }
+                            )
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    val mins = timerState.remainingSeconds / 60
+                    val secs = timerState.remainingSeconds % 60
+                    Text(
+                        text = String.format("%02d", mins),
+                        color = Color(0xFFFDCB6E),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }

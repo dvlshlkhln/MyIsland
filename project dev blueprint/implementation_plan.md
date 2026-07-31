@@ -1,46 +1,39 @@
-# Advanced Feature Proposals for MyIsland
+# Ultra-Smooth iOS Dynamic Island Feature Plan
 
-An extensive set of high-impact engineering proposals to take **MyIsland** to the next level of polish, functionality, and customization.
+Plan to upgrade **MyIsland** to match iOS 18 Dynamic Island appearance with physics-based spring morphing and Dual-Pill multi-session splitting.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> Please review the proposed new feature modules below and let us know which features you would like us to build next!
+> Please review the proposed visual and animation smoothness enhancements below!
 
 ---
 
-## 🚀 Proposed Feature Modules
+## 🎨 Proposed Enhancements
 
-### Module A: iOS-Style Top Volume & Ringer Island HUD
-- **Overview**: Intercept hardware side volume key presses (Volume Up / Down) and silent/ringer mode changes via `AudioManager`.
-- **UI Experience**: Replaces standard stock side volume bars with a sleek top-mounted volume slider and ringer status pill popping directly from your punch-hole camera.
+### 1. Organic Fluid Spring Morphing & Scale Physics
+- **Animation System**: Upgrade `animateContentSize` and width/height interpolators to custom spring specifications:
+  - `stiffness = Spring.StiffnessMediumLow`
+  - `dampingRatio = Spring.DampingRatioMediumBouncy`
+- **Effect**: Expanding and collapsing feels fluid, bouncy, and organic—just like iOS.
 
-### Module B: In-Island Quick Reply for WhatsApp & Telegram
-- **Overview**: Extend `IslandNotificationListenerService` with `RemoteInput` intent triggers.
-- **UI Experience**: Tapping "Reply" on an expanded notification opens an inline text box and Send button directly inside the Dynamic Island, letting you reply to messages instantly without leaving your current app.
+### 2. Dual-Pill Split Architecture (Dual Dynamic Island Sub-Pills)
+- **Multi-Session Support**: When two background activities are active simultaneously (e.g., Spotify Music + Active Countdown Timer):
+  - **Left Main Pill**: Displays Music Album Cover & Visualizer
+  - **Right Detached Sub-Pill**: Displays Live Timer Badge (e.g., `04:12`)
+- Tapping either pill expands its respective session card!
 
-### Module C: Lockscreen & Always-On Display (AOD) Integration
-- **Overview**: Extend `IslandOverlayService` layout flags to include `FLAG_SHOW_WHEN_LOCKED`.
-- **UI Experience**: Dynamic Island stays active on your lockscreen, displaying ongoing Spotify music playback, active countdown timers, and incoming call alerts when locking or picking up your phone.
+### 3. Hardware Camera Lens Blend Rim
+- Render an ultra-subtle glossy inner border and camera cutout mask so the physical camera lens melts seamlessly into the OLED black island pixels.
 
-### Module D: Dual-Hole, Side Cutout & Custom Notch Compatibility
-- **Overview**: Add customizable cutout geometry presets (Center Single Hole, Pill Cutout, Dual Hole, Left/Right Corner Hole).
-- **UI Experience**: Ensures 100% pixel-perfect framing across all Android phone designs (Motorola, Samsung Galaxy, Xiaomi, OnePlus, Pixel).
-
-### Module E: Radial Long-Press Quick Action Palette
-- **Overview**: Add long-press gesture detection (`onLongClick`).
-- **UI Experience**: Long-pressing the island opens a sleek popup quick-action wheel:
-  - 🔊 Switch Audio Output (Phone Speaker ↔ Bluetooth Headset)
-  - 🔕 Mute notifications from active app
-  - 🔦 Flashlight toggle
-  - 📸 Quick Screenshot trigger
+### 4. 4-Bar Sine Wave Frequency Audio Visualizer
+- Upgrade music visualizer to a 4-bar sine-wave physics animation with dynamic height phase shifts according to active media playback.
 
 ---
 
 ## Verification Plan
 
 ### Manual Verification
-1. Test volume button presses -> observe top island volume slider.
-2. Test in-island quick reply on WhatsApp notification.
-3. Test lockscreen overlay display when device is locked.
-4. Test radial quick action menu on long press.
+1. Play music + start timer simultaneously -> verify dual-pill splitting.
+2. Expand and collapse island -> verify fluid spring bouncy animation.
+3. Observe visualizer bars during playback.

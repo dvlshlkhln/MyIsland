@@ -1,25 +1,23 @@
-# MyIsland - Native Dynamic Island (Quick Actions, Y-Offset Calibration & Swipe Delete Fixed)
+# MyIsland - Native Dynamic Island (Dual-Pill Architecture & Fluid Motion Added)
 
-We have resolved all 3 issues reported:
+We have implemented iOS 18 Dual-Pill Architecture and fluid bouncy spring morphing physics.
 
 ---
 
-## 🛠️ Fixes & Enhancements
+## 🎨 Visual & Motion Enhancements Delivered
 
-1. **Functional Quick Action Buttons (Torch, Audio Out, Mute App)**:
-   - **Torch / Flashlight**: Created [CameraTorchManager.kt](file:///c:/Users/Deval%20Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/utils/CameraTorchManager.kt) to toggle physical camera LED flashlight on/off via `CameraManager`.
-   - **Audio Out**: Launches system Sound Settings (`Settings.ACTION_SOUND_SETTINGS`).
-   - **Mute App & Close**: Dismisses active menu and clears current notification.
+1. **Dual-Pill Split Sub-Pill Architecture**:
+   - When two background sessions are active concurrently (e.g., Spotify music + countdown timer), the island splits into a main left pill and a secondary right sub-pill badge (`04:12`), allowing multi-session interaction.
 
-2. **Real-time Y-Offset Slider Calibration**:
-   - Added `SharedPreferences.OnSharedPreferenceChangeListener` in [IslandOverlayService.kt](file:///c:/Users/Deval%20Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/service/IslandOverlayService.kt) to update `layoutParams.y = (islandConfig.yOffsetDp * density).toInt()` in real time when moving sliders in Settings.
+2. **4-Bar Sine Wave Frequency Audio Visualizer**:
+   - Upgraded audio visualizer in [CompactPillContent.kt](file:///c:/Users/Deval%20Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/ui/overlay/CompactPillContent.kt) to a 4-bar equalizer with phase-shifted height physics.
 
-3. **Swipe Left Notification Deletion**:
-   - Added `clearLatestNotification()` in [IslandNotificationListenerService.kt](file:///c:/Users/Deval%20Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/service/IslandNotificationListenerService.kt). Swiping left on an island notification item deletes it from memory and collapses the island.
+3. **Fluid Spring Morphing Physics**:
+   - Tuned morphing animations in [DynamicIslandView.kt](file:///c:/Users/Deval%20Shalkhlan/Desktop/reactApp/MyIsland/app/src/main/java/com/myisland/dynamic/ui/overlay/DynamicIslandView.kt) with `Spring.StiffnessMediumLow` & `Spring.DampingRatioMediumBouncy` for authentic iOS fluid motion.
 
 ---
 
 ## 🌐 GitHub Repository Status
 
 - Repository: **[https://github.com/dvlshlkhln/MyIsland](https://github.com/dvlshlkhln/MyIsland)**
-- All fixes committed to `working1` and merged into `main`.
+- All enhancements committed to `working1` and merged into `main`.

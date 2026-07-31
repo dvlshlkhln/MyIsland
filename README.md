@@ -16,6 +16,9 @@ Every commit pushed or merged into the `main` branch automatically triggers GitH
 
 ## ✨ Features
 
+- 👯 **Dual-Pill Split Sub-Pill Architecture (iOS Multi-Session)**: When music and a countdown timer run simultaneously, the island splits organically into a main left pill and a secondary detached right sub-pill.
+- 🌊 **4-Bar Sine Wave Audio Visualizer**: Dynamic equalizer bars with phase-shifted height physics matching active playback rhythm.
+- 💨 **Fluid Bouncy Spring Physics**: Morphing animations spec tuned to `Spring.StiffnessMediumLow` & `Spring.DampingRatioMediumBouncy` for authentic iOS fluid motion.
 - 🔦 **Physical Camera Flashlight Toggle (Quick Action)**: Tapping "Torch" in the long-press radial action menu turns your physical camera LED flashlight on/off via `CameraManager`.
 - 🔊 **Audio Output & App Mute Control**: Tapping "Audio Out" opens System Sound settings, while "Mute App" instantly dismisses the active notification.
 - 📐 **Live Y-Offset & X-Offset Position Calibration**: Adjusting Y-Offset or X-Offset sliders in Settings updates the floating overlay position in REAL TIME on screen (`layoutParams.y`).

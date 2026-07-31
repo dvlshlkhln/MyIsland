@@ -198,51 +198,65 @@ fun MusicVisualizerBars(accentColor: Color = Color(0xFFA29BFE)) {
     val infiniteTransition = rememberInfiniteTransition(label = "visualizer")
 
     val height1 by infiniteTransition.animateFloat(
-        initialValue = 6f,
+        initialValue = 4f,
         targetValue = 18f,
         animationSpec = infiniteRepeatable(
-            animation = tween(400, easing = LinearEasing),
+            animation = tween(380, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ), label = "h1"
     )
     val height2 by infiniteTransition.animateFloat(
-        initialValue = 16f,
+        initialValue = 18f,
         targetValue = 6f,
         animationSpec = infiniteRepeatable(
-            animation = tween(350, easing = LinearEasing),
+            animation = tween(320, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ), label = "h2"
     )
     val height3 by infiniteTransition.animateFloat(
-        initialValue = 8f,
+        initialValue = 6f,
         targetValue = 20f,
         animationSpec = infiniteRepeatable(
-            animation = tween(450, easing = LinearEasing),
+            animation = tween(420, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ), label = "h3"
     )
+    val height4 by infiniteTransition.animateFloat(
+        initialValue = 14f,
+        targetValue = 5f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(360, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ), label = "h4"
+    )
 
     Row(
-        horizontalArrangement = Arrangement.spacedBy(3.dp),
+        horizontalArrangement = Arrangement.spacedBy(2.5.dp),
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.height(20.dp)
     ) {
         Box(
             modifier = Modifier
-                .width(3.dp)
+                .width(2.5.dp)
                 .height(height1.dp)
                 .background(accentColor, CircleShape)
         )
         Box(
             modifier = Modifier
-                .width(3.dp)
+                .width(2.5.dp)
                 .height(height2.dp)
-                .background(accentColor.copy(alpha = 0.8f), CircleShape)
+                .background(accentColor.copy(alpha = 0.9f), CircleShape)
         )
         Box(
             modifier = Modifier
-                .width(3.dp)
+                .width(2.5.dp)
                 .height(height3.dp)
+                .background(accentColor.copy(alpha = 0.75f), CircleShape)
+        )
+        Box(
+            modifier = Modifier
+                .width(2.5.dp)
+                .height(height4.dp)
                 .background(accentColor.copy(alpha = 0.6f), CircleShape)
         )
     }
