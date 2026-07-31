@@ -16,11 +16,13 @@ Every commit pushed or merged into the `main` branch automatically triggers GitH
 
 ## ✨ Features
 
+- 🔦 **Physical Camera Flashlight Toggle (Quick Action)**: Tapping "Torch" in the long-press radial action menu turns your physical camera LED flashlight on/off via `CameraManager`.
+- 🔊 **Audio Output & App Mute Control**: Tapping "Audio Out" opens System Sound settings, while "Mute App" instantly dismisses the active notification.
+- 📐 **Live Y-Offset & X-Offset Position Calibration**: Adjusting Y-Offset or X-Offset sliders in Settings updates the floating overlay position in REAL TIME on screen (`layoutParams.y`).
+- 👈 **Swipe Left Gesture Notification Deletion**: Swiping left on an island notification item clears it from `IslandNotificationListenerService` and collapses the island with a slide-out animation and haptic vibration.
 - 🔊 **iOS-Style Top Volume & Ringer Island HUD**: Top-mounted progress slider popping directly from your punch-hole camera on side volume button presses.
 - 💬 **In-Island Quick Reply**: Type and send replies directly inside the expanded notification card for WhatsApp, Telegram, and SMS.
 - 🔒 **Lockscreen & Always-On Display (AOD) Support**: Stays active on your lockscreen (`FLAG_SHOW_WHEN_LOCKED`) for ongoing music, timers, and caller alerts.
-- 🖐️ **Radial Long-Press Quick Action Palette**: Long-pressing the island opens a popup wheel to switch audio output, mute app notifications, or toggle the flashlight.
-- 👈 **Swipe Left Gesture & Dismiss Animation**: Swipe left on the island pill to dismiss notifications or collapse views with fluid haptics and slide-out alpha animations.
 - 🎯 **Touch-Passthrough Window Architecture (UI Freeze Fix)**: Dynamically adjusts `WindowManager` overlay dimensions to strictly cover the island pill area with `FLAG_NOT_TOUCH_MODAL`, allowing taps anywhere else on the screen to pass through 100% unimpeded.
 - 🎨 **Dynamic Palette Accent Engine**: Real-time album cover artwork & app icon color extraction via Android `Palette` API. Automatically tints progress bars, play buttons, visualizer bars, and floating island glowing shadows to match active media.
 - 🔋 **Smart Power Saver & Zero Standby Battery Drain**: Automatically suspends Compose rendering pipelines and sets overlay visibility to `View.GONE` when the display turns off (`ACTION_SCREEN_OFF`), ensuring 0.0% standby battery drain.

@@ -5,7 +5,6 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -45,7 +44,10 @@ fun DynamicIslandView(
     onSwipeLeftDismiss: () -> Unit = {},
     onEndCall: () -> Unit = {},
     onToggleMuteCall: () -> Unit = {},
-    onAddTimerMinute: () -> Unit = {}
+    onAddTimerMinute: () -> Unit = {},
+    onToggleTorch: () -> Unit = {},
+    onToggleAudioOutput: () -> Unit = {},
+    onMuteActiveApp: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current.density
@@ -85,8 +87,7 @@ fun DynamicIslandView(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(top = config.yOffsetDp.dp),
+            .wrapContentHeight(),
         contentAlignment = Alignment.TopCenter
     ) {
         if (mode != IslandMode.HIDDEN) {
@@ -190,7 +191,10 @@ fun DynamicIslandView(
                             onAddTimerMinute = {
                                 hapticManager.performClickHaptic()
                                 onAddTimerMinute()
-                            }
+                            },
+                            onToggleTorch = onToggleTorch,
+                            onToggleAudioOutput = onToggleAudioOutput,
+                            onMuteActiveApp = onMuteActiveApp
                         )
                     }
                     IslandMode.TOAST -> {

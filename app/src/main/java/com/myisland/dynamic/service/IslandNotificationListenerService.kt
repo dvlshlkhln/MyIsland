@@ -2,7 +2,6 @@ package com.myisland.dynamic.service
 
 import android.app.Notification
 import android.content.ComponentName
-import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
@@ -19,6 +18,10 @@ class IslandNotificationListenerService : NotificationListenerService() {
 
         var mediaControllerInstance: MediaSessionController? = null
             private set
+
+        fun clearLatestNotification() {
+            _latestNotification.value = null
+        }
     }
 
     override fun onListenerConnected() {

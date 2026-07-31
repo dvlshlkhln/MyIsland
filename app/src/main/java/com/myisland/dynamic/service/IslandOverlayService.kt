@@ -5,10 +5,12 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.SharedPreferences
 import android.graphics.PixelFormat
 import android.media.AudioManager
 import android.os.Build
 import android.os.PowerManager
+import android.provider.Settings
 import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
@@ -26,6 +28,7 @@ import com.myisland.dynamic.data.IslandMode
 import com.myisland.dynamic.data.PreferencesManager
 import com.myisland.dynamic.ui.overlay.DynamicIslandView
 import com.myisland.dynamic.ui.theme.MyIslandTheme
+import com.myisland.dynamic.utils.CameraTorchManager
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
@@ -42,6 +45,7 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
     private lateinit var callSessionManager: CallSessionManager
     private lateinit var timerSessionManager: TimerSessionManager
     private lateinit var volumeRingerManager: VolumeRingerManager
+    private lateinit var torchManager: CameraTorchManager
 
     private val screenStateReceiver = ScreenStateReceiver()
 
@@ -49,6 +53,7 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
     private var islandConfig by mutableStateOf(IslandConfig())
 
     private lateinit var layoutParams: WindowManager.LayoutParams
+    private var preferenceChangeListener: SharedPreferences.OnSharedPreferenceChangeListener? = null
 
     companion object {
         const val CHANNEL_ID = "myisland_service_channel"
@@ -80,16 +85,26 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
         CallStateReceiver.callSessionManager = callSessionManager
 
         timerSessionManager = TimerSessionManager()
-
         volumeRingerManager = VolumeRingerManager(this)
         VolumeRingerReceiver.manager = volumeRingerManager
+        torchManager = CameraTorchManager(this)
 
         registerReceivers()
+        setupPreferenceListener()
         createNotificationChannel()
         startForeground(NOTIFICATION_ID, buildForegroundNotification())
 
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         setupOverlayView()
+    }
+
+    private fun setupPreferenceListener() {
+        preferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, _ ->
+            islandConfig = prefsManager.getConfig()
+            updateWindowLayout(currentMode, ScreenStateReceiver.isScreenOn.value)
+        }
+        val sp = getSharedPreferences("myisland_prefs", Context.MODE_PRIVATE)
+        sp.registerOnSharedPreferenceChangeListener(preferenceChangeListener)
     }
 
     private fun registerReceivers() {
@@ -115,6 +130,7 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
         if (!isScreenOn || mode == IslandMode.HIDDEN) {
             layoutParams.width = 1
             layoutParams.height = 1
+            layoutParams.y = 0
         } else {
             val (wDp, hDp) = when (mode) {
                 IslandMode.COMPACT -> Pair(islandConfig.compactWidthDp, islandConfig.compactHeightDp)
@@ -124,7 +140,9 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
             }
 
             layoutParams.width = (wDp * density).toInt() + 16
-            layoutParams.height = ((hDp + islandConfig.yOffsetDp) * density).toInt() + 16
+            layoutParams.height = (hDp * density).toInt() + 16
+            layoutParams.x = islandConfig.xOffsetDp
+            layoutParams.y = (islandConfig.yOffsetDp * density).toInt() // Direct Y-Offset window application!
         }
 
         try {
@@ -137,7 +155,8 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
     private fun setupOverlayView() {
         val density = resources.displayMetrics.density
         val initialWidth = ((islandConfig.compactWidthDp) * density).toInt() + 16
-        val initialHeight = ((islandConfig.compactHeightDp + islandConfig.yOffsetDp) * density).toInt() + 16
+        val initialHeight = ((islandConfig.compactHeightDp) * density).toInt() + 16
+        val initialY = (islandConfig.yOffsetDp * density).toInt()
 
         val flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                 WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
@@ -153,7 +172,7 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
         ).apply {
             gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
             x = islandConfig.xOffsetDp
-            y = 0
+            y = initialY
         }
 
         overlayView = ComposeView(this).apply {
@@ -175,7 +194,7 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
                     val bluetoothState by BluetoothEventReceiver.bluetoothState.collectAsState()
                     val volumeRingerState by volumeRingerManager.volumeState.collectAsState()
 
-                    LaunchedEffect(currentMode, isScreenOn) {
+                    LaunchedEffect(currentMode, isScreenOn, islandConfig) {
                         updateWindowLayout(currentMode, isScreenOn)
                     }
 
@@ -207,6 +226,7 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
                                 currentMode = IslandMode.COMPACT
                             },
                             onSwipeLeftDismiss = {
+                                IslandNotificationListenerService.clearLatestNotification()
                                 currentMode = IslandMode.COMPACT
                             },
                             onEndCall = {
@@ -217,6 +237,23 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
                             },
                             onAddTimerMinute = {
                                 timerSessionManager.addOneMinute()
+                            },
+                            onToggleTorch = {
+                                torchManager.toggleTorch()
+                            },
+                            onToggleAudioOutput = {
+                                try {
+                                    val intent = Intent(Settings.ACTION_SOUND_SETTINGS).apply {
+                                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                    }
+                                    startActivity(intent)
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+                            },
+                            onMuteActiveApp = {
+                                IslandNotificationListenerService.clearLatestNotification()
+                                currentMode = IslandMode.COMPACT
                             }
                         )
                     } else {
@@ -239,6 +276,11 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
             unregisterReceiver(screenStateReceiver)
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+
+        preferenceChangeListener?.let { listener ->
+            val sp = getSharedPreferences("myisland_prefs", Context.MODE_PRIVATE)
+            sp.unregisterOnSharedPreferenceChangeListener(listener)
         }
 
         if (::overlayView.isInitialized) {

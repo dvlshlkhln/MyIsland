@@ -40,7 +40,10 @@ fun ExpandedCardContent(
     onEndCall: () -> Unit = {},
     onToggleMuteCall: () -> Unit = {},
     onAddTimerMinute: () -> Unit = {},
-    onSendQuickReply: (String) -> Unit = {}
+    onSendQuickReply: (String) -> Unit = {},
+    onToggleTorch: () -> Unit = {},
+    onToggleAudioOutput: () -> Unit = {},
+    onMuteActiveApp: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier
@@ -48,7 +51,12 @@ fun ExpandedCardContent(
             .padding(16.dp)
     ) {
         if (showQuickActionMenu) {
-            ExpandedQuickActionPaletteView(onDismiss = onDismiss)
+            ExpandedQuickActionPaletteView(
+                onToggleTorch = onToggleTorch,
+                onToggleAudioOutput = onToggleAudioOutput,
+                onMuteActiveApp = onMuteActiveApp,
+                onDismiss = onDismiss
+            )
         } else if (callState.isRinging || callState.isActiveCall) {
             ExpandedCallView(
                 callState = callState,
@@ -86,7 +94,12 @@ fun ExpandedCardContent(
 }
 
 @Composable
-fun ExpandedQuickActionPaletteView(onDismiss: () -> Unit) {
+fun ExpandedQuickActionPaletteView(
+    onToggleTorch: () -> Unit,
+    onToggleAudioOutput: () -> Unit,
+    onMuteActiveApp: () -> Unit,
+    onDismiss: () -> Unit
+) {
     Row(
         modifier = Modifier.fillMaxSize(),
         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -94,7 +107,10 @@ fun ExpandedQuickActionPaletteView(onDismiss: () -> Unit) {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             IconButton(
-                onClick = onDismiss,
+                onClick = {
+                    onToggleAudioOutput()
+                    onDismiss()
+                },
                 modifier = Modifier
                     .size(44.dp)
                     .clip(CircleShape)
@@ -102,12 +118,16 @@ fun ExpandedQuickActionPaletteView(onDismiss: () -> Unit) {
             ) {
                 Icon(imageVector = Icons.Default.VolumeUp, contentDescription = "Speaker", tint = Color.White)
             }
+            Spacer(modifier = Modifier.height(2.dp))
             Text(text = "Audio Out", fontSize = 11.sp, color = Color.White.copy(alpha = 0.8f))
         }
 
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             IconButton(
-                onClick = onDismiss,
+                onClick = {
+                    onToggleTorch()
+                    onDismiss()
+                },
                 modifier = Modifier
                     .size(44.dp)
                     .clip(CircleShape)
@@ -115,19 +135,24 @@ fun ExpandedQuickActionPaletteView(onDismiss: () -> Unit) {
             ) {
                 Icon(imageVector = Icons.Default.FlashlightOn, contentDescription = "Flashlight", tint = Color.Black)
             }
+            Spacer(modifier = Modifier.height(2.dp))
             Text(text = "Torch", fontSize = 11.sp, color = Color.White.copy(alpha = 0.8f))
         }
 
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             IconButton(
-                onClick = onDismiss,
+                onClick = {
+                    onMuteActiveApp()
+                    onDismiss()
+                },
                 modifier = Modifier
                     .size(44.dp)
                     .clip(CircleShape)
                     .background(Color(0xFF6C5CE7))
             ) {
-                Icon(imageVector = Icons.Default.NotificationsOff, contentDescription = "Mute Notifs", tint = Color.White)
+                Icon(imageVector = Icons.Default.NotificationsOff, contentDescription = "Mute App", tint = Color.White)
             }
+            Spacer(modifier = Modifier.height(2.dp))
             Text(text = "Mute App", fontSize = 11.sp, color = Color.White.copy(alpha = 0.8f))
         }
 
@@ -141,6 +166,7 @@ fun ExpandedQuickActionPaletteView(onDismiss: () -> Unit) {
             ) {
                 Icon(imageVector = Icons.Default.Close, contentDescription = "Close Menu", tint = Color.White)
             }
+            Spacer(modifier = Modifier.height(2.dp))
             Text(text = "Close", fontSize = 11.sp, color = Color.White.copy(alpha = 0.8f))
         }
     }
