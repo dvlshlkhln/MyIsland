@@ -37,14 +37,21 @@ class MediaSessionController(private val context: Context) {
     fun init(componentName: ComponentName) {
         try {
             val controllers = mediaSessionManager?.getActiveSessions(componentName)
-            attachController(controllers?.firstOrNull())
+            attachController(selectBestController(controllers))
 
             mediaSessionManager?.addOnActiveSessionsChangedListener({ newControllers ->
-                attachController(newControllers?.firstOrNull())
+                attachController(selectBestController(newControllers))
             }, componentName)
         } catch (e: SecurityException) {
             e.printStackTrace()
         }
+    }
+
+    private fun selectBestController(controllers: List<MediaController>?): MediaController? {
+        if (controllers.isNullOrEmpty()) return null
+        return controllers.firstOrNull { it.playbackState?.state == PlaybackState.STATE_PLAYING }
+            ?: controllers.firstOrNull { it.metadata?.getString(MediaMetadata.METADATA_KEY_TITLE)?.isNotBlank() == true }
+            ?: controllers.firstOrNull()
     }
 
     private fun attachController(controller: MediaController?) {

@@ -17,6 +17,7 @@ Every commit pushed or merged into the `main` branch automatically triggers GitH
 ## ✨ Features
 
 - 🤖 **Zero-Calibration Display Cutout Auto-Detection**: Uses native Android `DisplayCutout` API (`WindowInsets`) to automatically detect physical camera cutout bounds & status bar inset, auto-adjusting Y-offset and pill width instantly.
+- ⭕ **Camera Ring Collapsed Mode**: Optional collapsed idle style that transforms the island into a glowing circular ring surrounding your physical punch-hole camera cutout, expanding into full card mode on tap.
 - 🎵 **Interactive Media Track Seeking & Live Timestamps**: Smooth seek slider with live timestamp readout (`01:42 / 03:55`) for scrubbing audio tracks directly inside expanded media cards.
 - 💾 **Custom User Alignment Presets & Recall**: Save your fine-tuned position & size calibration as "My Custom Preset" in Settings, with instant 1-tap recall anytime.
 - 🖼️ **Real-Time Aesthetic Render Preview**: Interactive live preview box inside Settings showing instant visual changes to island size, themes, visualizers, and rounded corners.

@@ -34,6 +34,10 @@ class PreferencesManager(context: Context) {
         private const val KEY_CUSTOM_W = "custom_w"
         private const val KEY_CUSTOM_H = "custom_h"
         private const val KEY_CUSTOM_R = "custom_r"
+
+        private const val KEY_COLLAPSE_STYLE = "collapse_style"
+        private const val KEY_RING_DIAMETER = "ring_diameter"
+        private const val KEY_RING_THICKNESS = "ring_thickness"
     }
 
     fun getConfig(): IslandConfig {
@@ -41,6 +45,7 @@ class PreferencesManager(context: Context) {
         val visOrdinal = prefs.getInt(KEY_VISUALIZER_STYLE, VisualizerStyle.FOUR_BARS.ordinal)
         val hapticOrdinal = prefs.getInt(KEY_HAPTIC_LEVEL, HapticFeedbackLevel.MEDIUM.ordinal)
         val auraOrdinal = prefs.getInt(KEY_AURA_GLOW, AuraGlowIntensity.VIBRANT.ordinal)
+        val collapseOrdinal = prefs.getInt(KEY_COLLAPSE_STYLE, IslandCollapseStyle.PILL.ordinal)
 
         return IslandConfig(
             yOffsetDp = prefs.getInt(KEY_Y_OFFSET, 10),
@@ -64,7 +69,10 @@ class PreferencesManager(context: Context) {
             customXOffsetDp = prefs.getInt(KEY_CUSTOM_X, 0),
             customCompactWidthDp = prefs.getInt(KEY_CUSTOM_W, 200),
             customCompactHeightDp = prefs.getInt(KEY_CUSTOM_H, 40),
-            customCornerRadiusDp = prefs.getInt(KEY_CUSTOM_R, 24)
+            customCornerRadiusDp = prefs.getInt(KEY_CUSTOM_R, 24),
+            collapseStyle = IslandCollapseStyle.values().getOrElse(collapseOrdinal) { IslandCollapseStyle.PILL },
+            cameraRingDiameterDp = prefs.getInt(KEY_RING_DIAMETER, 48),
+            cameraRingThicknessDp = prefs.getInt(KEY_RING_THICKNESS, 4)
         )
     }
 
@@ -86,6 +94,9 @@ class PreferencesManager(context: Context) {
             putInt(KEY_AUTO_COLLAPSE_SEC, config.autoCollapseSeconds)
             putInt(KEY_HAPTIC_LEVEL, config.hapticLevel.ordinal)
             putInt(KEY_AURA_GLOW, config.auraGlowIntensity.ordinal)
+            putInt(KEY_COLLAPSE_STYLE, config.collapseStyle.ordinal)
+            putInt(KEY_RING_DIAMETER, config.cameraRingDiameterDp)
+            putInt(KEY_RING_THICKNESS, config.cameraRingThicknessDp)
             apply()
         }
     }

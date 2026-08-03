@@ -4,8 +4,10 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -79,6 +81,7 @@ fun DynamicIslandView(
     var showQuickActionMenu by remember { mutableStateOf(false) }
 
     val isDualSession = (mediaState.isPlaying || mediaState.albumArt != null) && timerState.isRunning && mode == IslandMode.COMPACT
+    val isRingMode = config.collapseStyle == IslandCollapseStyle.CAMERA_RING && mode == IslandMode.COMPACT
 
     val paletteColors = remember(mediaState.albumArt, notification?.icon) {
         PaletteThemeExtractor.extractColors(mediaState.albumArt ?: notification?.icon)
@@ -93,14 +96,14 @@ fun DynamicIslandView(
 
     val targetWidth = when (mode) {
         IslandMode.HIDDEN -> 0.dp
-        IslandMode.COMPACT -> if (isDualSession) (config.compactWidthDp - 40).dp else config.compactWidthDp.dp
+        IslandMode.COMPACT -> if (isRingMode) config.cameraRingDiameterDp.dp else (if (isDualSession) (config.compactWidthDp - 40).dp else config.compactWidthDp.dp)
         IslandMode.EXPANDED -> config.expandedWidthDp.dp
         IslandMode.TOAST -> (config.expandedWidthDp - 20).dp
     }
 
     val targetHeight = when (mode) {
         IslandMode.HIDDEN -> 0.dp
-        IslandMode.COMPACT -> config.compactHeightDp.dp
+        IslandMode.COMPACT -> if (isRingMode) config.cameraRingDiameterDp.dp else config.compactHeightDp.dp
         IslandMode.EXPANDED -> config.expandedHeightDp.dp
         IslandMode.TOAST -> (config.compactHeightDp + 16).dp
     }
@@ -118,6 +121,8 @@ fun DynamicIslandView(
         IslandThemeStyle.GLASSMORPHISM -> Modifier.background(Color(0xCC111118))
     }
 
+    val islandShape = if (isRingMode) CircleShape else RoundedCornerShape(config.cornerRadiusDp.dp)
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -134,11 +139,11 @@ fun DynamicIslandView(
                     .alpha(alphaFraction)
                     .shadow(
                         elevation = 20.dp,
-                        shape = RoundedCornerShape(config.cornerRadiusDp.dp),
+                        shape = islandShape,
                         spotColor = if (isCalibrationMode) Color(0xFFFF7675) else if (navigationState.isNavigating) Color(0xFF00CEC9) else paletteColors.vibrantAccent,
                         ambientColor = if (isCalibrationMode) Color(0xFFFF7675) else if (navigationState.isNavigating) Color(0xFF00CEC9) else paletteColors.vibrantAccent
                     )
-                    .clip(RoundedCornerShape(config.cornerRadiusDp.dp))
+                    .clip(islandShape)
                     .then(themeBackgroundModifier)
                     .animateContentSize(
                         animationSpec = spring(
@@ -155,50 +160,48 @@ fun DynamicIslandView(
                                 onPositionDragged(config.xOffsetDp + deltaX, config.yOffsetDp + deltaY)
                             }
                         } else {
-                            detectTapGestures(
-                                onTap = {
-                                    hapticManager.performClickHaptic()
-                                    showQuickActionMenu = false
-                                    onToggleExpand()
-                                },
-                                onDoubleTap = {
-                                    hapticManager.performHeavyHaptic()
-                                    if (mediaState.isPlaying || mediaState.albumArt != null) {
-                                        onPlayPauseToggle()
-                                    } else {
-                                        onMuteActiveApp()
-                                    }
-                                },
-                                onLongPress = {
-                                    hapticManager.performHeavyHaptic()
-                                    showQuickActionMenu = true
-                                    if (mode != IslandMode.EXPANDED) {
-                                        onToggleExpand()
-                                    }
-                                }
-                            )
-                        }
-                    }
-                    .pointerInput(isCalibrationMode) {
-                        if (!isCalibrationMode) {
                             detectHorizontalDragGestures(
                                 onDragEnd = {
-                                    if (dragXOffset < -100f) {
+                                    if (dragXOffset < -70f) {
                                         hapticManager.performHeavyHaptic()
                                         onSwipeLeftDismiss()
-                                    } else if (dragXOffset > 100f && mediaState.isPlaying) {
+                                    } else if (dragXOffset > 70f) {
                                         hapticManager.performClickHaptic()
                                         onSkipNext()
                                     }
                                     dragXOffset = 0f
                                 },
                                 onDragCancel = { dragXOffset = 0f },
-                                onHorizontalDrag = { _, dragAmount ->
+                                onHorizontalDrag = { change, dragAmount ->
+                                    change.consume()
                                     dragXOffset = (dragXOffset + dragAmount).coerceIn(-300f, 300f)
                                 }
                             )
                         }
                     }
+                    .combinedClickable(
+                        enabled = !isCalibrationMode,
+                        onClick = {
+                            hapticManager.performClickHaptic()
+                            showQuickActionMenu = false
+                            onToggleExpand()
+                        },
+                        onDoubleClick = {
+                            hapticManager.performHeavyHaptic()
+                            if (mediaState.isPlaying || mediaState.title.isNotBlank()) {
+                                onPlayPauseToggle()
+                            } else {
+                                onMuteActiveApp()
+                            }
+                        },
+                        onLongClick = {
+                            hapticManager.performHeavyHaptic()
+                            showQuickActionMenu = true
+                            if (mode != IslandMode.EXPANDED) {
+                                onToggleExpand()
+                            }
+                        }
+                    )
             ) {
                 if (isCalibrationMode) {
                     Box(
@@ -210,6 +213,38 @@ fun DynamicIslandView(
                             color = Color(0xFFFF7675),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold
+                        )
+                    }
+                } else if (isRingMode) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape)
+                            .background(PureBlack.copy(alpha = 0.85f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape)
+                                .background(
+                                    Brush.sweepGradient(
+                                        listOf(
+                                            paletteColors.vibrantAccent,
+                                            IslandAccentPrimary,
+                                            paletteColors.vibrantAccent
+                                        )
+                                    )
+                                )
+                                .padding(config.cameraRingThicknessDp.dp)
+                                .clip(CircleShape)
+                                .background(PureBlack)
+                        )
+                        Box(
+                            modifier = Modifier
+                                .size(10.dp)
+                                .clip(CircleShape)
+                                .background(paletteColors.vibrantAccent)
                         )
                     }
                 } else {

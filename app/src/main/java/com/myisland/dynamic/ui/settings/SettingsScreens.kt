@@ -380,6 +380,60 @@ fun SettingsDashboardScreen(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
+                        text = "Collapsed Idle Mode",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Choose between classic compact pill or a circular accent ring around your camera cutout.",
+                        fontSize = 12.sp,
+                        color = TextMuted
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        IslandCollapseStyle.values().forEach { style ->
+                            FilterChip(
+                                selected = config.collapseStyle == style,
+                                onClick = { onConfigChange(config.copy(collapseStyle = style)) },
+                                label = {
+                                    Text(
+                                        text = if (style == IslandCollapseStyle.PILL) "Classic Pill" else "Camera Ring Accent",
+                                        fontSize = 11.sp
+                                    )
+                                },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = IslandAccentPrimary,
+                                    selectedLabelColor = Color.White
+                                )
+                            )
+                        }
+                    }
+
+                    if (config.collapseStyle == IslandCollapseStyle.CAMERA_RING) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        CalibrationSlider(
+                            label = "Camera Ring Diameter",
+                            value = config.cameraRingDiameterDp.toFloat(),
+                            range = 36f..72f,
+                            onValueChange = { onConfigChange(config.copy(cameraRingDiameterDp = it.toInt())) }
+                        )
+                        CalibrationSlider(
+                            label = "Ring Stroke Thickness",
+                            value = config.cameraRingThicknessDp.toFloat(),
+                            range = 2f..8f,
+                            onValueChange = { onConfigChange(config.copy(cameraRingThicknessDp = it.toInt())) }
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
                         text = "Haptic Vibration Feedback",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,

@@ -42,6 +42,11 @@ enum class AuraGlowIntensity {
     VIBRANT
 }
 
+enum class IslandCollapseStyle {
+    PILL,
+    CAMERA_RING
+}
+
 enum class NavigationDirection {
     STRAIGHT,
     TURN_LEFT,
@@ -178,5 +183,8 @@ data class IslandConfig(
     val customXOffsetDp: Int = 0,
     val customCompactWidthDp: Int = 200,
     val customCompactHeightDp: Int = 40,
-    val customCornerRadiusDp: Int = 24
+    val customCornerRadiusDp: Int = 24,
+    val collapseStyle: IslandCollapseStyle = IslandCollapseStyle.PILL,
+    val cameraRingDiameterDp: Int = 48,
+    val cameraRingThicknessDp: Int = 4
 )

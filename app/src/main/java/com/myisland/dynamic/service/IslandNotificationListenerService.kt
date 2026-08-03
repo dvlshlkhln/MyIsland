@@ -59,7 +59,7 @@ class IslandNotificationListenerService : NotificationListenerService() {
         if (sbn == null) return
 
         val pkg = sbn.packageName
-        if (pkg == packageName) return
+        if (pkg == packageName || pkg == "android" || pkg == "com.android.systemui" || pkg == "com.google.android.systemui") return
 
         // Check if package is muted by user
         if (::prefsManager.isInitialized && prefsManager.getMutedPackages().contains(pkg)) {
@@ -69,6 +69,16 @@ class IslandNotificationListenerService : NotificationListenerService() {
         val extras = sbn.notification.extras
         val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString() ?: ""
         val text = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString() ?: ""
+        val combinedText = "$title $text".lowercase()
+
+        // Filter out system overlay warnings (e.g. "displaying over other apps", "drawing over other apps", "running in background")
+        if (combinedText.contains("displaying over other apps") ||
+            combinedText.contains("drawing over other apps") ||
+            combinedText.contains("is displaying over") ||
+            combinedText.contains("running in the background") ||
+            combinedText.contains("overlay active")) {
+            return
+        }
 
         // 1. Handle Screen Recording & Voice Recording Notifications
         if (pkg.contains("screenrecord") || pkg.contains("recorder") || title.contains("recording", ignoreCase = true) || text.contains("recording", ignoreCase = true)) {
@@ -99,16 +109,19 @@ class IslandNotificationListenerService : NotificationListenerService() {
         }
 
         // 3. Handle Navigation Maps Apps
-        if (pkg.contains("apps.maps") || pkg.contains("waze") || title.contains("turn", ignoreCase = true) || text.contains("turn", ignoreCase = true)) {
-            val direction = parseNavigationDirection("$title $text")
-            _navigationState.value = NavigationState(
-                isNavigating = true,
-                direction = direction,
-                distanceText = extractDistance("$title $text"),
-                streetName = title.ifBlank { text },
-                appName = if (pkg.contains("waze")) "Waze" else "Google Maps"
-            )
-            return
+        if (pkg.contains("apps.maps") || pkg.contains("waze")) {
+            if (combinedText.contains("head") || combinedText.contains("turn") || combinedText.contains("continue") || combinedText.contains("destination") || combinedText.contains("exit") || combinedText.contains("onto")) {
+                val direction = parseNavigationDirection("$title $text")
+                _navigationState.value = NavigationState(
+                    isNavigating = true,
+                    direction = direction,
+                    distanceText = extractDistance("$title $text"),
+                    streetName = title.ifBlank { text },
+                    appName = if (pkg.contains("waze")) "Waze" else "Google Maps"
+                )
+                return
+            }
+            if (sbn.isOngoing) return
         }
 
         if (sbn.isOngoing) return
