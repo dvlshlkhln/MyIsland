@@ -10,6 +10,7 @@ val DarkSurfaceVariant = Color(0xFF22222E)
 val IslandAccentPrimary = Color(0xFF6C5CE7)
 val IslandAccentSecondary = Color(0xFFA29BFE)
 val VibrantGreen = Color(0xFF00B894)
+val VibrantRed = Color(0xFFFF7675)
 val ElectricBlue = Color(0xFF0984E3)
 val BrightOrange = Color(0xFFE17055)
 
