@@ -17,6 +17,8 @@ Every commit pushed or merged into the `main` branch automatically triggers GitH
 ## ✨ Features
 
 - 🤖 **Zero-Calibration Display Cutout Auto-Detection**: Uses native Android `DisplayCutout` API (`WindowInsets`) to automatically detect physical camera cutout bounds & status bar inset, auto-adjusting Y-offset and pill width instantly.
+- 🎵 **Interactive Media Track Seeking & Live Timestamps**: Smooth seek slider with live timestamp readout (`01:42 / 03:55`) for scrubbing audio tracks directly inside expanded media cards.
+- 💾 **Custom User Alignment Presets & Recall**: Save your fine-tuned position & size calibration as "My Custom Preset" in Settings, with instant 1-tap recall anytime.
 - 🖼️ **Real-Time Aesthetic Render Preview**: Interactive live preview box inside Settings showing instant visual changes to island size, themes, visualizers, and rounded corners.
 - 🔍 **Smart Notification Whitelist & Search Manager**: Live app title search, category filter tabs (All, Allowed, Blocked), and 1-tap "Allow All" / "Block All" controls for all installed applications.
 - 🖐️ **Interactive Gesture Cheat-Sheet Guide**: In-app visual onboarding breakdown of single-tap, double-tap, long-press, swipe-left, and swipe-right gesture controls.

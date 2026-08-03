@@ -256,6 +256,9 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
                             onSkipPrevious = {
                                 IslandNotificationListenerService.mediaControllerInstance?.skipToPrevious()
                             },
+                            onSeekTo = { posMs ->
+                                IslandNotificationListenerService.mediaControllerInstance?.seekTo(posMs)
+                            },
                             onDismiss = {
                                 currentMode = IslandMode.COMPACT
                             },

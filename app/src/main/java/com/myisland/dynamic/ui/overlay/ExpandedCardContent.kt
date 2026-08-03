@@ -41,6 +41,7 @@ fun ExpandedCardContent(
     onPlayPauseToggle: () -> Unit,
     onSkipNext: () -> Unit,
     onSkipPrevious: () -> Unit,
+    onSeekTo: (Long) -> Unit = {},
     onDismiss: () -> Unit,
     onEndCall: () -> Unit = {},
     onToggleMuteCall: () -> Unit = {},
@@ -97,7 +98,8 @@ fun ExpandedCardContent(
                 paletteColors = paletteColors,
                 onPlayPauseToggle = onPlayPauseToggle,
                 onSkipNext = onSkipNext,
-                onSkipPrevious = onSkipPrevious
+                onSkipPrevious = onSkipPrevious,
+                onSeekTo = onSeekTo
             )
         } else if (notification != null) {
             ExpandedNotificationView(
@@ -429,7 +431,8 @@ fun ExpandedMediaView(
     paletteColors: IslandPaletteColors = IslandPaletteColors(),
     onPlayPauseToggle: () -> Unit,
     onSkipNext: () -> Unit,
-    onSkipPrevious: () -> Unit
+    onSkipPrevious: () -> Unit,
+    onSeekTo: (Long) -> Unit = {}
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -444,13 +447,13 @@ fun ExpandedMediaView(
                     bitmap = mediaState.albumArt.asImageBitmap(),
                     contentDescription = "Album Cover",
                     modifier = Modifier
-                        .size(54.dp)
+                        .size(52.dp)
                         .clip(RoundedCornerShape(12.dp))
                 )
             } else {
                 Box(
                     modifier = Modifier
-                        .size(54.dp)
+                        .size(52.dp)
                         .clip(RoundedCornerShape(12.dp))
                         .background(paletteColors.mutedBackground),
                     contentAlignment = Alignment.Center
@@ -485,19 +488,37 @@ fun ExpandedMediaView(
             }
         }
 
-        val progress = if (mediaState.durationMs > 0) {
-            (mediaState.positionMs.toFloat() / mediaState.durationMs.toFloat()).coerceIn(0f, 1f)
-        } else 0f
+        // Live Scrubbing Slider & Timestamps
+        val durMs = maxOf(1L, mediaState.durationMs)
+        val posMs = mediaState.positionMs.coerceIn(0L, durMs)
+        var sliderPos by remember(posMs) { mutableFloatStateOf(posMs.toFloat()) }
 
-        LinearProgressIndicator(
-            progress = progress,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(4.dp)
-                .clip(RoundedCornerShape(2.dp)),
-            color = paletteColors.vibrantAccent,
-            trackColor = Color.White.copy(alpha = 0.2f)
-        )
+        val currentSec = posMs / 1000
+        val durSec = durMs / 1000
+        val posStr = String.format("%02d:%02d", currentSec / 60, currentSec % 60)
+        val durStr = String.format("%02d:%02d", durSec / 60, durSec % 60)
+
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(text = posStr, fontSize = 10.sp, color = Color.White.copy(alpha = 0.6f))
+                Text(text = if (mediaState.durationMs > 0) durStr else "--:--", fontSize = 10.sp, color = Color.White.copy(alpha = 0.6f))
+            }
+            Slider(
+                value = sliderPos.coerceIn(0f, durMs.toFloat()),
+                onValueChange = { sliderPos = it },
+                onValueChangeFinished = { onSeekTo(sliderPos.toLong()) },
+                valueRange = 0f..durMs.toFloat(),
+                colors = SliderDefaults.colors(
+                    thumbColor = paletteColors.vibrantAccent,
+                    activeTrackColor = paletteColors.vibrantAccent,
+                    inactiveTrackColor = Color.White.copy(alpha = 0.2f)
+                ),
+                modifier = Modifier.height(18.dp)
+            )
+        }
 
         Row(
             modifier = Modifier.fillMaxWidth(),

@@ -23,15 +23,24 @@ class PreferencesManager(context: Context) {
         private const val KEY_NOTIFS_ENABLED = "notifs_enabled"
         private const val KEY_AUTO_COLLAPSE_SEC = "auto_collapse_sec"
         private const val KEY_HAPTIC_LEVEL = "haptic_level"
+        private const val KEY_AURA_GLOW = "aura_glow"
         private const val KEY_SERVICE_RUNNING = "service_running"
         private const val KEY_MUTED_PACKAGES = "muted_packages"
         private const val KEY_AUTO_CUTOUT_ENABLED = "auto_cutout_enabled"
+
+        private const val KEY_HAS_CUSTOM_PRESET = "has_custom_preset"
+        private const val KEY_CUSTOM_Y = "custom_y"
+        private const val KEY_CUSTOM_X = "custom_x"
+        private const val KEY_CUSTOM_W = "custom_w"
+        private const val KEY_CUSTOM_H = "custom_h"
+        private const val KEY_CUSTOM_R = "custom_r"
     }
 
     fun getConfig(): IslandConfig {
         val themeOrdinal = prefs.getInt(KEY_THEME_STYLE, IslandThemeStyle.MIDNIGHT_OLED.ordinal)
         val visOrdinal = prefs.getInt(KEY_VISUALIZER_STYLE, VisualizerStyle.FOUR_BARS.ordinal)
         val hapticOrdinal = prefs.getInt(KEY_HAPTIC_LEVEL, HapticFeedbackLevel.MEDIUM.ordinal)
+        val auraOrdinal = prefs.getInt(KEY_AURA_GLOW, AuraGlowIntensity.VIBRANT.ordinal)
 
         return IslandConfig(
             yOffsetDp = prefs.getInt(KEY_Y_OFFSET, 10),
@@ -48,7 +57,14 @@ class PreferencesManager(context: Context) {
             isNotificationsEnabled = prefs.getBoolean(KEY_NOTIFS_ENABLED, true),
             isAutoCutoutDetectionEnabled = prefs.getBoolean(KEY_AUTO_CUTOUT_ENABLED, false),
             autoCollapseSeconds = prefs.getInt(KEY_AUTO_COLLAPSE_SEC, 4),
-            hapticLevel = HapticFeedbackLevel.values().getOrElse(hapticOrdinal) { HapticFeedbackLevel.MEDIUM }
+            hapticLevel = HapticFeedbackLevel.values().getOrElse(hapticOrdinal) { HapticFeedbackLevel.MEDIUM },
+            auraGlowIntensity = AuraGlowIntensity.values().getOrElse(auraOrdinal) { AuraGlowIntensity.VIBRANT },
+            hasCustomPreset = prefs.getBoolean(KEY_HAS_CUSTOM_PRESET, false),
+            customYOffsetDp = prefs.getInt(KEY_CUSTOM_Y, 10),
+            customXOffsetDp = prefs.getInt(KEY_CUSTOM_X, 0),
+            customCompactWidthDp = prefs.getInt(KEY_CUSTOM_W, 200),
+            customCompactHeightDp = prefs.getInt(KEY_CUSTOM_H, 40),
+            customCornerRadiusDp = prefs.getInt(KEY_CUSTOM_R, 24)
         )
     }
 
@@ -69,6 +85,19 @@ class PreferencesManager(context: Context) {
             putBoolean(KEY_AUTO_CUTOUT_ENABLED, config.isAutoCutoutDetectionEnabled)
             putInt(KEY_AUTO_COLLAPSE_SEC, config.autoCollapseSeconds)
             putInt(KEY_HAPTIC_LEVEL, config.hapticLevel.ordinal)
+            putInt(KEY_AURA_GLOW, config.auraGlowIntensity.ordinal)
+            apply()
+        }
+    }
+
+    fun saveCustomPreset(config: IslandConfig) {
+        prefs.edit().apply {
+            putBoolean(KEY_HAS_CUSTOM_PRESET, true)
+            putInt(KEY_CUSTOM_Y, config.yOffsetDp)
+            putInt(KEY_CUSTOM_X, config.xOffsetDp)
+            putInt(KEY_CUSTOM_W, config.compactWidthDp)
+            putInt(KEY_CUSTOM_H, config.compactHeightDp)
+            putInt(KEY_CUSTOM_R, config.cornerRadiusDp)
             apply()
         }
     }

@@ -62,6 +62,7 @@ fun DynamicIslandView(
     onPlayPauseToggle: () -> Unit,
     onSkipNext: () -> Unit,
     onSkipPrevious: () -> Unit,
+    onSeekTo: (Long) -> Unit = {},
     onDismiss: () -> Unit,
     onSwipeLeftDismiss: () -> Unit = {},
     onEndCall: () -> Unit = {},
@@ -253,6 +254,7 @@ fun DynamicIslandView(
                                     hapticManager.performClickHaptic()
                                     onSkipPrevious()
                                 },
+                                onSeekTo = onSeekTo,
                                 onDismiss = {
                                     hapticManager.performHeavyHaptic()
                                     showQuickActionMenu = false

@@ -298,6 +298,35 @@ fun SettingsDashboardScreen(
                             )
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Text(
+                        text = "Ambient Accent Aura Glow",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        AuraGlowIntensity.values().forEach { glow ->
+                            FilterChip(
+                                selected = config.auraGlowIntensity == glow,
+                                onClick = { onConfigChange(config.copy(auraGlowIntensity = glow)) },
+                                label = {
+                                    Text(text = glow.name, fontSize = 11.sp)
+                                },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = IslandAccentPrimary,
+                                    selectedLabelColor = Color.White
+                                )
+                            )
+                        }
+                    }
                 }
             }
 
@@ -494,6 +523,61 @@ fun SettingsDashboardScreen(
                                     }
                                 )
                             }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Custom User Alignment Save / Load Controls
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = {
+                                prefsManager.saveCustomPreset(config)
+                                onConfigChange(
+                                    config.copy(
+                                        hasCustomPreset = true,
+                                        customYOffsetDp = config.yOffsetDp,
+                                        customXOffsetDp = config.xOffsetDp,
+                                        customCompactWidthDp = config.compactWidthDp,
+                                        customCompactHeightDp = config.compactHeightDp,
+                                        customCornerRadiusDp = config.cornerRadiusDp
+                                    )
+                                )
+                            },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = VibrantGreen)
+                        ) {
+                            Icon(imageVector = Icons.Default.Save, contentDescription = "Save Preset", modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(text = "Save Custom", fontSize = 11.sp)
+                        }
+
+                        Button(
+                            onClick = {
+                                if (config.hasCustomPreset) {
+                                    onConfigChange(
+                                        config.copy(
+                                            yOffsetDp = config.customYOffsetDp,
+                                            xOffsetDp = config.customXOffsetDp,
+                                            compactWidthDp = config.customCompactWidthDp,
+                                            compactHeightDp = config.customCompactHeightDp,
+                                            cornerRadiusDp = config.customCornerRadiusDp
+                                        )
+                                    )
+                                }
+                            },
+                            enabled = config.hasCustomPreset,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = IslandAccentPrimary)
+                        ) {
+                            Icon(imageVector = Icons.Default.Star, contentDescription = "Load Preset", modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(text = if (config.hasCustomPreset) "Load Custom" else "No Saved Preset", fontSize = 11.sp)
                         }
                     }
                 }
@@ -850,6 +934,12 @@ fun LiveIslandPreviewCard(config: IslandConfig) {
         IslandThemeStyle.GLASSMORPHISM -> Brush.linearGradient(listOf(Color(0xCC111118), Color(0xCC22222E)))
     }
 
+    val glowSpotColor = when (config.auraGlowIntensity) {
+        AuraGlowIntensity.DISABLED -> Color.Transparent
+        AuraGlowIntensity.SUBTLE -> IslandAccentPrimary.copy(alpha = 0.4f)
+        AuraGlowIntensity.VIBRANT -> IslandAccentPrimary
+    }
+
     Card(
         colors = CardDefaults.cardColors(containerColor = DarkSurface),
         shape = RoundedCornerShape(16.dp),
@@ -891,9 +981,10 @@ fun LiveIslandPreviewCard(config: IslandConfig) {
                         .width((config.compactWidthDp * 0.8f).dp)
                         .height((config.compactHeightDp * 0.85f).dp)
                         .shadow(
-                            elevation = 12.dp,
+                            elevation = if (config.auraGlowIntensity == AuraGlowIntensity.DISABLED) 0.dp else 12.dp,
                             shape = RoundedCornerShape(config.cornerRadiusDp.dp),
-                            spotColor = IslandAccentPrimary
+                            spotColor = glowSpotColor,
+                            ambientColor = glowSpotColor
                         )
                         .clip(RoundedCornerShape(config.cornerRadiusDp.dp))
                         .background(themeBrush)

@@ -36,6 +36,12 @@ enum class HapticFeedbackLevel {
     HEAVY
 }
 
+enum class AuraGlowIntensity {
+    DISABLED,
+    SUBTLE,
+    VIBRANT
+}
+
 enum class NavigationDirection {
     STRAIGHT,
     TURN_LEFT,
@@ -165,5 +171,12 @@ data class IslandConfig(
     val isAutoCutoutDetectionEnabled: Boolean = false,
     val autoCollapseSeconds: Int = 4,
     val hapticLevel: HapticFeedbackLevel = HapticFeedbackLevel.MEDIUM,
-    val isCalibrationMode: Boolean = false
+    val isCalibrationMode: Boolean = false,
+    val auraGlowIntensity: AuraGlowIntensity = AuraGlowIntensity.VIBRANT,
+    val hasCustomPreset: Boolean = false,
+    val customYOffsetDp: Int = 10,
+    val customXOffsetDp: Int = 0,
+    val customCompactWidthDp: Int = 200,
+    val customCompactHeightDp: Int = 40,
+    val customCornerRadiusDp: Int = 24
 )
