@@ -13,6 +13,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+import com.myisland.dynamic.data.DownloadState
+import com.myisland.dynamic.data.RecordingState
+
 class IslandNotificationListenerService : NotificationListenerService() {
 
     private lateinit var prefsManager: PreferencesManager
@@ -23,6 +26,12 @@ class IslandNotificationListenerService : NotificationListenerService() {
 
         private val _navigationState = MutableStateFlow(NavigationState())
         val navigationState: StateFlow<NavigationState> = _navigationState.asStateFlow()
+
+        private val _downloadState = MutableStateFlow(DownloadState())
+        val downloadState: StateFlow<DownloadState> = _downloadState.asStateFlow()
+
+        private val _recordingState = MutableStateFlow(RecordingState())
+        val recordingState: StateFlow<RecordingState> = _recordingState.asStateFlow()
 
         var mediaControllerInstance: MediaSessionController? = null
             private set
@@ -61,7 +70,35 @@ class IslandNotificationListenerService : NotificationListenerService() {
         val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString() ?: ""
         val text = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString() ?: ""
 
-        // Handle Navigation Maps Apps
+        // 1. Handle Screen Recording & Voice Recording Notifications
+        if (pkg.contains("screenrecord") || pkg.contains("recorder") || title.contains("recording", ignoreCase = true) || text.contains("recording", ignoreCase = true)) {
+            val isPaused = title.contains("pause", ignoreCase = true) || text.contains("pause", ignoreCase = true)
+            val recType = if (pkg.contains("screen")) "Screen Recording" else "Voice Recording"
+            _recordingState.value = RecordingState(
+                isRecording = true,
+                type = recType,
+                durationSeconds = 12,
+                isPaused = isPaused
+            )
+            return
+        }
+
+        // 2. Handle Live Downloads Notifications
+        val progressMax = extras.getInt(Notification.EXTRA_PROGRESS_MAX, 0)
+        val progressCurrent = extras.getInt(Notification.EXTRA_PROGRESS, 0)
+        if (progressMax > 0 || pkg.contains("android.providers.downloads") || title.contains("download", ignoreCase = true)) {
+            val percent = if (progressMax > 0) ((progressCurrent.toFloat() / progressMax.toFloat()) * 100).toInt() else 45
+            _downloadState.value = DownloadState(
+                isDownloading = true,
+                fileName = title.ifBlank { "Downloading File..." },
+                progressPercent = percent.coerceIn(0, 100),
+                bytesPerSec = 2400000L,
+                appName = if (pkg.contains("chrome")) "Chrome" else "Download Manager"
+            )
+            return
+        }
+
+        // 3. Handle Navigation Maps Apps
         if (pkg.contains("apps.maps") || pkg.contains("waze") || title.contains("turn", ignoreCase = true) || text.contains("turn", ignoreCase = true)) {
             val direction = parseNavigationDirection("$title $text")
             _navigationState.value = NavigationState(
@@ -127,6 +164,12 @@ class IslandNotificationListenerService : NotificationListenerService() {
             }
             if (sbn.packageName.contains("apps.maps") || sbn.packageName.contains("waze")) {
                 _navigationState.value = NavigationState(isNavigating = false)
+            }
+            if (sbn.packageName.contains("screenrecord") || sbn.packageName.contains("recorder")) {
+                _recordingState.value = RecordingState(isRecording = false)
+            }
+            if (sbn.packageName.contains("android.providers.downloads") || sbn.notification.extras.getInt(Notification.EXTRA_PROGRESS_MAX, 0) > 0) {
+                _downloadState.value = DownloadState(isDownloading = false)
             }
         }
     }

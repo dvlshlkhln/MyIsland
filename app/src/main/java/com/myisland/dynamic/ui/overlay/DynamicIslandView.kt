@@ -52,6 +52,10 @@ fun DynamicIslandView(
     bluetoothState: BluetoothDeviceState = BluetoothDeviceState(),
     volumeRingerState: VolumeRingerState = VolumeRingerState(),
     navigationState: NavigationState = NavigationState(),
+    downloadState: DownloadState = DownloadState(),
+    recordingState: RecordingState = RecordingState(),
+    hotspotState: HotspotState = HotspotState(),
+    audioOutputManager: com.myisland.dynamic.utils.AudioOutputManager? = null,
     isCalibrationMode: Boolean = false,
     onPositionDragged: (Int, Int) -> Unit = { _, _ -> },
     onToggleExpand: () -> Unit,
@@ -69,7 +73,7 @@ fun DynamicIslandView(
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current.density
-    val hapticManager = remember { HapticManager(context) }
+    val hapticManager = remember(config.hapticLevel) { HapticManager(context, config.hapticLevel) }
 
     var showQuickActionMenu by remember { mutableStateOf(false) }
 
@@ -156,6 +160,14 @@ fun DynamicIslandView(
                                     showQuickActionMenu = false
                                     onToggleExpand()
                                 },
+                                onDoubleTap = {
+                                    hapticManager.performHeavyHaptic()
+                                    if (mediaState.isPlaying || mediaState.albumArt != null) {
+                                        onPlayPauseToggle()
+                                    } else {
+                                        onMuteActiveApp()
+                                    }
+                                },
                                 onLongPress = {
                                     hapticManager.performHeavyHaptic()
                                     showQuickActionMenu = true
@@ -173,14 +185,15 @@ fun DynamicIslandView(
                                     if (dragXOffset < -100f) {
                                         hapticManager.performHeavyHaptic()
                                         onSwipeLeftDismiss()
+                                    } else if (dragXOffset > 100f && mediaState.isPlaying) {
+                                        hapticManager.performClickHaptic()
+                                        onSkipNext()
                                     }
                                     dragXOffset = 0f
                                 },
                                 onDragCancel = { dragXOffset = 0f },
                                 onHorizontalDrag = { _, dragAmount ->
-                                    if (dragAmount < 0 || dragXOffset < 0) {
-                                        dragXOffset = (dragXOffset + dragAmount).coerceIn(-300f, 0f)
-                                    }
+                                    dragXOffset = (dragXOffset + dragAmount).coerceIn(-300f, 300f)
                                 }
                             )
                         }
@@ -210,6 +223,9 @@ fun DynamicIslandView(
                                 bluetoothState = bluetoothState,
                                 volumeRingerState = volumeRingerState,
                                 navigationState = navigationState,
+                                downloadState = downloadState,
+                                recordingState = recordingState,
+                                hotspotState = hotspotState,
                                 visualizerStyle = config.visualizerStyle,
                                 paletteColors = paletteColors
                             )

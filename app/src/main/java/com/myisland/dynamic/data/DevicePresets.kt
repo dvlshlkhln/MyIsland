@@ -11,7 +11,7 @@ object DevicePresets {
         name = "Motorola Edge 60 Pro",
         brand = "Motorola",
         config = IslandConfig(
-            yOffsetDp = 34,
+            yOffsetDp = 10,
             xOffsetDp = 0,
             compactWidthDp = 200,
             compactHeightDp = 40,
@@ -25,7 +25,7 @@ object DevicePresets {
         name = "Samsung Galaxy S20 FE",
         brand = "Samsung",
         config = IslandConfig(
-            yOffsetDp = 28,
+            yOffsetDp = 8,
             xOffsetDp = 0,
             compactWidthDp = 185,
             compactHeightDp = 38,
@@ -39,7 +39,7 @@ object DevicePresets {
         name = "Samsung Galaxy S23 Plus",
         brand = "Samsung",
         config = IslandConfig(
-            yOffsetDp = 26,
+            yOffsetDp = 8,
             xOffsetDp = 0,
             compactWidthDp = 180,
             compactHeightDp = 36,
@@ -53,7 +53,7 @@ object DevicePresets {
         name = "Motorola Edge 50 Ultra / 40 Pro",
         brand = "Motorola",
         config = IslandConfig(
-            yOffsetDp = 32,
+            yOffsetDp = 10,
             xOffsetDp = 0,
             compactWidthDp = 190,
             compactHeightDp = 38,
@@ -67,7 +67,7 @@ object DevicePresets {
         name = "Generic Center Punch-Hole",
         brand = "Generic",
         config = IslandConfig(
-            yOffsetDp = 28,
+            yOffsetDp = 8,
             xOffsetDp = 0,
             compactWidthDp = 185,
             compactHeightDp = 38,

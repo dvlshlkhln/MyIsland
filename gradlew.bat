@@ -14,7 +14,7 @@
 @rem limitations under the License.
 @rem
 
-@if "%DEBUG%" == "" @echo off
+@echo on
 @rem ##########################################################################
 @rem
 @rem  Gradle startup script for Windows
@@ -52,7 +52,8 @@ goto fail
 
 :findJavaFromJavaHome
 set JAVA_HOME=%JAVA_HOME:"=%
-set JAVA_EXE=%JAVA_HOME%/bin/java.exe
+for /f "tokens=*" %%a in ("%JAVA_HOME%") do set JAVA_HOME=%%~fa
+set JAVA_EXE=%JAVA_HOME%\bin\java.exe
 
 if exist "%JAVA_EXE%" goto execute
 

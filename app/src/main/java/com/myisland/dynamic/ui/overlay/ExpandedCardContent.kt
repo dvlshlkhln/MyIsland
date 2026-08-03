@@ -32,6 +32,10 @@ fun ExpandedCardContent(
     timerState: TimerState = TimerState(),
     bluetoothState: BluetoothDeviceState = BluetoothDeviceState(),
     navigationState: NavigationState = NavigationState(),
+    downloadState: DownloadState = DownloadState(),
+    recordingState: RecordingState = RecordingState(),
+    hotspotState: HotspotState = HotspotState(),
+    audioOutputManager: com.myisland.dynamic.utils.AudioOutputManager? = null,
     paletteColors: IslandPaletteColors = IslandPaletteColors(),
     showQuickActionMenu: Boolean = false,
     onPlayPauseToggle: () -> Unit,
@@ -46,18 +50,31 @@ fun ExpandedCardContent(
     onToggleAudioOutput: () -> Unit = {},
     onMuteActiveApp: () -> Unit = {}
 ) {
+    var showAudioDevicePicker by remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        if (showQuickActionMenu) {
+        if (showAudioDevicePicker && audioOutputManager != null) {
+            ExpandedAudioDevicePickerView(
+                audioOutputManager = audioOutputManager,
+                onClose = { showAudioDevicePicker = false }
+            )
+        } else if (showQuickActionMenu) {
             ExpandedQuickActionPaletteView(
                 onToggleTorch = onToggleTorch,
-                onToggleAudioOutput = onToggleAudioOutput,
+                onToggleAudioOutput = { showAudioDevicePicker = true },
                 onMuteActiveApp = onMuteActiveApp,
                 onDismiss = onDismiss
             )
+        } else if (recordingState.isRecording) {
+            ExpandedRecordingView(recordingState = recordingState, onDismiss = onDismiss)
+        } else if (downloadState.isDownloading) {
+            ExpandedDownloadView(downloadState = downloadState, onDismiss = onDismiss)
+        } else if (hotspotState.isActive) {
+            ExpandedHotspotView(hotspotState = hotspotState)
         } else if (navigationState.isNavigating) {
             ExpandedNavigationView(navigationState = navigationState)
         } else if (callState.isRinging || callState.isActiveCall) {
@@ -681,6 +698,173 @@ fun ExpandedChargingView(chargingState: ChargingState) {
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium
             )
+        }
+    }
+}
+
+@Composable
+fun ExpandedRecordingView(recordingState: RecordingState, onDismiss: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxSize(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .size(14.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFFFF7675))
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Column {
+                Text(
+                    text = recordingState.type,
+                    color = Color.White,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = if (recordingState.isPaused) "Recording Paused" else "Active • 00:12",
+                    color = Color(0xFFFF7675),
+                    fontSize = 12.sp
+                )
+            }
+        }
+        Button(
+            onClick = onDismiss,
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF7675)),
+            shape = RoundedCornerShape(12.dp),
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+        ) {
+            Text(text = "Stop", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+@Composable
+fun ExpandedDownloadView(downloadState: DownloadState, onDismiss: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = downloadState.fileName,
+                color = Color.White,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = "${downloadState.progressPercent}%",
+                color = Color(0xFF00CEC9),
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        LinearProgressIndicator(
+            progress = (downloadState.progressPercent / 100f).coerceIn(0f, 1f),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(6.dp)
+                .clip(CircleShape),
+            color = Color(0xFF00CEC9),
+            trackColor = Color.White.copy(alpha = 0.2f)
+        )
+    }
+}
+
+@Composable
+fun ExpandedHotspotView(hotspotState: HotspotState) {
+    Row(
+        modifier = Modifier.fillMaxSize(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Default.WifiTethering,
+                contentDescription = "Hotspot",
+                tint = Color(0xFF00CEC9),
+                modifier = Modifier.size(32.dp)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Column {
+                Text(
+                    text = "Personal Hotspot",
+                    color = Color.White,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "${hotspotState.clientCount} Devices Connected",
+                    color = Color(0xFF00CEC9),
+                    fontSize = 12.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ExpandedAudioDevicePickerView(
+    audioOutputManager: com.myisland.dynamic.utils.AudioOutputManager,
+    onClose: () -> Unit
+) {
+    val devices by audioOutputManager.availableDevices.collectAsState()
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Select Audio Route",
+                color = Color.White,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold
+            )
+            IconButton(onClick = onClose) {
+                Icon(imageVector = Icons.Default.Close, contentDescription = "Close", tint = Color.White)
+            }
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            devices.take(3).forEach { device ->
+                Button(
+                    onClick = {
+                        audioOutputManager.selectAudioDevice(device)
+                        onClose()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (device.isActive) Color(0xFF00CEC9) else Color(0xFF2D3436)
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = device.name.take(12),
+                        color = Color.White,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
         }
     }
 }

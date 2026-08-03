@@ -22,16 +22,19 @@ class PreferencesManager(context: Context) {
         private const val KEY_CHARGING_ENABLED = "charging_enabled"
         private const val KEY_NOTIFS_ENABLED = "notifs_enabled"
         private const val KEY_AUTO_COLLAPSE_SEC = "auto_collapse_sec"
+        private const val KEY_HAPTIC_LEVEL = "haptic_level"
         private const val KEY_SERVICE_RUNNING = "service_running"
         private const val KEY_MUTED_PACKAGES = "muted_packages"
+        private const val KEY_AUTO_CUTOUT_ENABLED = "auto_cutout_enabled"
     }
 
     fun getConfig(): IslandConfig {
         val themeOrdinal = prefs.getInt(KEY_THEME_STYLE, IslandThemeStyle.MIDNIGHT_OLED.ordinal)
         val visOrdinal = prefs.getInt(KEY_VISUALIZER_STYLE, VisualizerStyle.FOUR_BARS.ordinal)
+        val hapticOrdinal = prefs.getInt(KEY_HAPTIC_LEVEL, HapticFeedbackLevel.MEDIUM.ordinal)
 
         return IslandConfig(
-            yOffsetDp = prefs.getInt(KEY_Y_OFFSET, 34),
+            yOffsetDp = prefs.getInt(KEY_Y_OFFSET, 10),
             xOffsetDp = prefs.getInt(KEY_X_OFFSET, 0),
             compactWidthDp = prefs.getInt(KEY_COMPACT_WIDTH, 200),
             compactHeightDp = prefs.getInt(KEY_COMPACT_HEIGHT, 40),
@@ -43,7 +46,9 @@ class PreferencesManager(context: Context) {
             isMusicEnabled = prefs.getBoolean(KEY_MUSIC_ENABLED, true),
             isChargingEnabled = prefs.getBoolean(KEY_CHARGING_ENABLED, true),
             isNotificationsEnabled = prefs.getBoolean(KEY_NOTIFS_ENABLED, true),
-            autoCollapseSeconds = prefs.getInt(KEY_AUTO_COLLAPSE_SEC, 4)
+            isAutoCutoutDetectionEnabled = prefs.getBoolean(KEY_AUTO_CUTOUT_ENABLED, false),
+            autoCollapseSeconds = prefs.getInt(KEY_AUTO_COLLAPSE_SEC, 4),
+            hapticLevel = HapticFeedbackLevel.values().getOrElse(hapticOrdinal) { HapticFeedbackLevel.MEDIUM }
         )
     }
 
@@ -61,7 +66,9 @@ class PreferencesManager(context: Context) {
             putBoolean(KEY_MUSIC_ENABLED, config.isMusicEnabled)
             putBoolean(KEY_CHARGING_ENABLED, config.isChargingEnabled)
             putBoolean(KEY_NOTIFS_ENABLED, config.isNotificationsEnabled)
+            putBoolean(KEY_AUTO_CUTOUT_ENABLED, config.isAutoCutoutDetectionEnabled)
             putInt(KEY_AUTO_COLLAPSE_SEC, config.autoCollapseSeconds)
+            putInt(KEY_HAPTIC_LEVEL, config.hapticLevel.ordinal)
             apply()
         }
     }
@@ -86,5 +93,9 @@ class PreferencesManager(context: Context) {
             set.add(packageName)
         }
         prefs.edit().putStringSet(KEY_MUTED_PACKAGES, set).apply()
+    }
+
+    fun setMutedPackages(packages: Set<String>) {
+        prefs.edit().putStringSet(KEY_MUTED_PACKAGES, packages).apply()
     }
 }

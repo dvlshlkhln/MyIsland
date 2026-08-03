@@ -174,6 +174,13 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
             gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
             x = islandConfig.xOffsetDp
             y = initialY
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                layoutInDisplayCutoutMode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+                } else {
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+                }
+            }
         }
 
         overlayView = ComposeView(this).apply {
@@ -189,6 +196,9 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
 
                     val notification by IslandNotificationListenerService.latestNotification.collectAsState()
                     val navigationState by IslandNotificationListenerService.navigationState.collectAsState()
+                    val downloadState by IslandNotificationListenerService.downloadState.collectAsState()
+                    val recordingState by IslandNotificationListenerService.recordingState.collectAsState()
+                    val hotspotState by HotspotStateReceiver.hotspotState.collectAsState()
                     val chargingState by SystemEventReceiver.chargingState.collectAsState()
 
                     val callState by callSessionManager.callState.collectAsState()
@@ -196,7 +206,19 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
                     val bluetoothState by BluetoothEventReceiver.bluetoothState.collectAsState()
                     val volumeRingerState by volumeRingerManager.volumeState.collectAsState()
 
+                    val audioOutputManager = remember { com.myisland.dynamic.utils.AudioOutputManager(this@IslandOverlayService) }
+
                     LaunchedEffect(currentMode, isScreenOn, islandConfig) {
+                        if (islandConfig.isAutoCutoutDetectionEnabled && ::overlayView.isInitialized) {
+                            val detected = com.myisland.dynamic.utils.CutoutDetector.detectCutout(overlayView)
+                            if (detected.hasCutout) {
+                                islandConfig = islandConfig.copy(
+                                    yOffsetDp = detected.yOffsetDp,
+                                    compactWidthDp = detected.compactWidthDp,
+                                    compactHeightDp = detected.compactHeightDp
+                                )
+                            }
+                        }
                         updateWindowLayout(currentMode, isScreenOn)
                     }
 
@@ -213,6 +235,15 @@ class IslandOverlayService : LifecycleService(), SavedStateRegistryOwner {
                             bluetoothState = bluetoothState,
                             volumeRingerState = volumeRingerState,
                             navigationState = navigationState,
+                            downloadState = downloadState,
+                            recordingState = recordingState,
+                            hotspotState = hotspotState,
+                            audioOutputManager = audioOutputManager,
+                            isCalibrationMode = islandConfig.isCalibrationMode,
+                            onPositionDragged = { newX, newY ->
+                                islandConfig = islandConfig.copy(xOffsetDp = newX, yOffsetDp = newY)
+                                prefsManager.saveConfig(islandConfig)
+                            },
                             onToggleExpand = {
                                 currentMode = if (currentMode == IslandMode.EXPANDED) IslandMode.COMPACT else IslandMode.EXPANDED
                             },

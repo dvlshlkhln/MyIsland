@@ -36,6 +36,9 @@ fun CompactPillContent(
     bluetoothState: BluetoothDeviceState = BluetoothDeviceState(),
     volumeRingerState: VolumeRingerState = VolumeRingerState(),
     navigationState: NavigationState = NavigationState(),
+    downloadState: DownloadState = DownloadState(),
+    recordingState: RecordingState = RecordingState(),
+    hotspotState: HotspotState = HotspotState(),
     visualizerStyle: VisualizerStyle = VisualizerStyle.FOUR_BARS,
     paletteColors: IslandPaletteColors = IslandPaletteColors(),
     modifier: Modifier = Modifier
@@ -53,7 +56,29 @@ fun CompactPillContent(
             horizontalArrangement = Arrangement.Start,
             modifier = Modifier.weight(1f)
         ) {
-            if (navigationState.isNavigating) {
+            if (recordingState.isRecording) {
+                Box(
+                    modifier = Modifier
+                        .size(10.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFFF7675))
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+            } else if (downloadState.isDownloading) {
+                Icon(
+                    imageVector = Icons.Default.Download,
+                    contentDescription = "Downloading",
+                    tint = Color(0xFF00CEC9),
+                    modifier = Modifier.size(20.dp)
+                )
+            } else if (hotspotState.isActive) {
+                Icon(
+                    imageVector = Icons.Default.WifiTethering,
+                    contentDescription = "Hotspot",
+                    tint = Color(0xFF00CEC9),
+                    modifier = Modifier.size(20.dp)
+                )
+            } else if (navigationState.isNavigating) {
                 Icon(
                     imageVector = when (navigationState.direction) {
                         NavigationDirection.TURN_LEFT -> Icons.Default.TurnLeft
@@ -144,7 +169,28 @@ fun CompactPillContent(
             horizontalArrangement = Arrangement.End,
             modifier = Modifier.weight(1f)
         ) {
-            if (navigationState.isNavigating) {
+            if (recordingState.isRecording) {
+                Text(
+                    text = if (recordingState.isPaused) "Paused" else "00:12",
+                    color = Color(0xFFFF7675),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            } else if (downloadState.isDownloading) {
+                Text(
+                    text = "${downloadState.progressPercent}%",
+                    color = Color(0xFF00CEC9),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            } else if (hotspotState.isActive) {
+                Text(
+                    text = "${hotspotState.clientCount} Dev",
+                    color = Color(0xFF00CEC9),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            } else if (navigationState.isNavigating) {
                 Text(
                     text = navigationState.distanceText,
                     color = Color(0xFF00CEC9),

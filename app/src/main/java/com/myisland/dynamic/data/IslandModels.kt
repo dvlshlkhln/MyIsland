@@ -29,6 +29,13 @@ enum class VisualizerStyle {
     PULSE_RING
 }
 
+enum class HapticFeedbackLevel {
+    OFF,
+    LIGHT,
+    MEDIUM,
+    HEAVY
+}
+
 enum class NavigationDirection {
     STRAIGHT,
     TURN_LEFT,
@@ -97,13 +104,47 @@ data class ChargingState(
     val chargingWattText: String = "68W TurboPower"
 )
 
+enum class AudioDeviceType {
+    SPEAKER,
+    BLUETOOTH,
+    HEADPHONES
+}
+
+data class AudioOutputDevice(
+    val id: String = "",
+    val name: String = "Phone Speaker",
+    val type: AudioDeviceType = AudioDeviceType.SPEAKER,
+    val isActive: Boolean = false
+)
+
+data class DownloadState(
+    val isDownloading: Boolean = false,
+    val fileName: String = "",
+    val progressPercent: Int = 0,
+    val bytesPerSec: Long = 0L,
+    val appName: String = "Download Manager"
+)
+
+data class RecordingState(
+    val isRecording: Boolean = false,
+    val type: String = "Screen",
+    val durationSeconds: Int = 0,
+    val isPaused: Boolean = false
+)
+
+data class HotspotState(
+    val isActive: Boolean = false,
+    val clientCount: Int = 0,
+    val speedKbps: Long = 0L
+)
+
 data class RingerState(
     val modeName: String = "Normal",
     val iconResId: Int = 0
 )
 
 data class IslandConfig(
-    val yOffsetDp: Int = 34,           // Motorola Edge 60 Pro Default
+    val yOffsetDp: Int = 10,           // Motorola Edge 60 Pro Default
     val xOffsetDp: Int = 0,            // Center Aligned
     val compactWidthDp: Int = 200,
     val compactHeightDp: Int = 40,
@@ -121,5 +162,8 @@ data class IslandConfig(
     val isTimersEnabled: Boolean = true,
     val isBluetoothEnabled: Boolean = true,
     val isVolumeHudEnabled: Boolean = true,
-    val autoCollapseSeconds: Int = 4
+    val isAutoCutoutDetectionEnabled: Boolean = false,
+    val autoCollapseSeconds: Int = 4,
+    val hapticLevel: HapticFeedbackLevel = HapticFeedbackLevel.MEDIUM,
+    val isCalibrationMode: Boolean = false
 )
