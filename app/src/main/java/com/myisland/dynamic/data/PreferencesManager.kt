@@ -102,6 +102,10 @@ class PreferencesManager(context: Context) {
         }
     }
 
+    fun clearCustomPreset() {
+        prefs.edit().putBoolean(KEY_HAS_CUSTOM_PRESET, false).apply()
+    }
+
     fun isServiceEnabled(): Boolean {
         return prefs.getBoolean(KEY_SERVICE_RUNNING, false)
     }

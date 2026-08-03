@@ -51,6 +51,9 @@ Every commit pushed or merged into the `main` branch automatically triggers GitH
   - **Samsung Galaxy S20 FE**
   - **Samsung Galaxy S23 Plus**
   - **Motorola Edge 50 Ultra / 40 Pro**
+  - **Google Pixel 8 Pro / Pixel 9**
+  - **OnePlus 12 / 12R**
+  - **Xiaomi 14 / Poco F6**
   - **Generic Center Punch-Hole**
 - 📞 **Live Phone Call Manager**: Displays incoming & active phone calls with caller name/avatar, live call timer, and interactive **Mute** & **End Call** controls.
 - ⏱️ **Active Countdown Timers**: Streams system clock countdown timers & stopwatches with live `MM:SS` display and **+1 Min** quick extension button.

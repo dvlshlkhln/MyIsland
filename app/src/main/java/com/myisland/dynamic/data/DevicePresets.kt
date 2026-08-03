@@ -63,6 +63,48 @@ object DevicePresets {
         )
     )
 
+    val GOOGLE_PIXEL_8_PRO = DevicePreset(
+        name = "Google Pixel 8 Pro / Pixel 9",
+        brand = "Google",
+        config = IslandConfig(
+            yOffsetDp = 12,
+            xOffsetDp = 0,
+            compactWidthDp = 190,
+            compactHeightDp = 38,
+            expandedWidthDp = 350,
+            expandedHeightDp = 170,
+            cornerRadiusDp = 24
+        )
+    )
+
+    val ONEPLUS_12 = DevicePreset(
+        name = "OnePlus 12 / 12R",
+        brand = "OnePlus",
+        config = IslandConfig(
+            yOffsetDp = 10,
+            xOffsetDp = 0,
+            compactWidthDp = 185,
+            compactHeightDp = 38,
+            expandedWidthDp = 345,
+            expandedHeightDp = 165,
+            cornerRadiusDp = 22
+        )
+    )
+
+    val XIAOMI_14 = DevicePreset(
+        name = "Xiaomi 14 / Poco F6",
+        brand = "Xiaomi",
+        config = IslandConfig(
+            yOffsetDp = 8,
+            xOffsetDp = 0,
+            compactWidthDp = 180,
+            compactHeightDp = 36,
+            expandedWidthDp = 340,
+            expandedHeightDp = 165,
+            cornerRadiusDp = 22
+        )
+    )
+
     val GENERIC_PUNCH_HOLE = DevicePreset(
         name = "Generic Center Punch-Hole",
         brand = "Generic",
@@ -82,6 +124,9 @@ object DevicePresets {
         SAMSUNG_S20_FE,
         SAMSUNG_S23_PLUS,
         MOTOROLA_EDGE_50_ULTRA,
+        GOOGLE_PIXEL_8_PRO,
+        ONEPLUS_12,
+        XIAOMI_14,
         GENERIC_PUNCH_HOLE
     )
 }

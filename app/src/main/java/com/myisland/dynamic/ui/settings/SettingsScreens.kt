@@ -580,6 +580,25 @@ fun SettingsDashboardScreen(
                             Text(text = if (config.hasCustomPreset) "Load Custom" else "No Saved Preset", fontSize = 11.sp)
                         }
                     }
+
+                    if (config.hasCustomPreset) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            TextButton(
+                                onClick = {
+                                    prefsManager.clearCustomPreset()
+                                    onConfigChange(config.copy(hasCustomPreset = false))
+                                }
+                            ) {
+                                Icon(imageVector = Icons.Default.DeleteOutline, contentDescription = "Clear Custom", modifier = Modifier.size(14.dp), tint = TextMuted)
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(text = "Clear Saved Custom Preset", fontSize = 11.sp, color = TextMuted)
+                            }
+                        }
+                    }
                 }
             }
 
